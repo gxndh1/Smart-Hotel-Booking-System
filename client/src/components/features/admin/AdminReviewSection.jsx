@@ -37,7 +37,7 @@ const AdminReviewSection = ({ reviews, onDelete }) => {
                 {review.comment?.substring(0, 80) || "No comment"}...
               </td>
               <td className="text-muted small">
-                {review.date ? new Date(review.date).toLocaleDateString() : "N/A"}
+                {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "N/A"}
               </td>
               <td className="text-end pe-3">
                 <button
