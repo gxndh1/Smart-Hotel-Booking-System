@@ -140,7 +140,7 @@ export const updateUserRole = async (req, res) => {
           image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'
         });
 
-        // Create a default room for the hotel
+        // Create a default room for the
         await Room.create({
           hotelId: newHotel._id,
           hotelName: newHotel.name,
