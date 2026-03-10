@@ -341,10 +341,6 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
                             </>
                           )}
                         </div>
-                        <div className="text-end">
-                          <span className="h5 fw-bold text-dark mb-0">₹{booking.totalPrice?.toLocaleString() || "---"}</span>
-                          <small className="text-muted d-block xsmall">Total Paid</small>
-                        </div>
                       </div>
                     </div>
                   </div>
