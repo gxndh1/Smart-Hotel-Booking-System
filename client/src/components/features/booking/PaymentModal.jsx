@@ -1,0 +1,669 @@
+
+import React, { useState } from 'react';
+import { Modal, Button, Form } from 'react-bootstrap';
+import { FaCreditCard, FaUniversity, FaWallet, FaMobileAlt, FaCheck, FaArrowLeft, FaGift, FaShieldAlt, FaUtensils, FaPlaneDeparture } from 'react-icons/fa';
+
+const PaymentModal = ({ show, onHide, bookingDetails, onConfirm, onMethodSelect, redemptionPointsBalance = 0, onRedemptionChange }) => {
+  const [step, setStep] = useState('method'); // 'method' -> 'form' -> 'confirm'
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [formData, setFormData] = useState({
+    cardNumber: '',
+    cardHolder: '',
+    expiryDate: '',
+    cvv: '',
+    bankName: '',
+    accountNumber: '',
+    walletEmail: '',
+    phoneNumber: '',
+  });
+  const [extras, setExtras] = useState({
+    breakfast: false,
+    airportPickup: false
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [redemptionPoints, setRedemptionPoints] = useState(0);
+  const [redemptionError, setRedemptionError] = useState('');
+
+  // FIX: Redemption rate standardized to 1 point = 1 rupee (matching backend)
+  const redemptionDiscount = redemptionPoints;
+  
+  // Calculate extras
+  const extrasTotal = (extras.breakfast ? 500 : 0) + (extras.airportPickup ? 1200 : 0);
+  
+  // Calculate final total
+  const finalTotal = (bookingDetails?.total || 0) + extrasTotal - redemptionDiscount;
+  
+  // Ensure finalTotal doesn't go below 0
+  const actualFinalTotal = finalTotal > 0 ? finalTotal : 0;
+  
+  // FIX: Match system-wide 10% loyalty earning rate
+  const pointsToEarn = Math.floor(actualFinalTotal * 0.1);
+
+  // Handle redemption points change
+  const handleRedemptionChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    
+    if (value < 0) {
+      setRedemptionError('Points cannot be negative');
+      return;
+    }
+    
+    if (value > 500) {
+      setRedemptionError('Maximum 500 redemption points can be used at once');
+      return;
+    }
+    
+    if (value > redemptionPointsBalance) {
+      setRedemptionError(`You only have ${redemptionPointsBalance} redemption points`);
+      return;
+    }
+    
+    if (value > actualFinalTotal) {
+      setRedemptionError('Discount cannot exceed total amount');
+      return;
+    }
+    
+    setRedemptionError('');
+    setRedemptionPoints(value);
+    
+    // Notify parent component
+    if (onRedemptionChange) {
+      onRedemptionChange(value);
+    }
+  };
+
+  const paymentMethods = [
+    {
+      id: 'card',
+      name: 'Credit/Debit Card',
+      icon: <FaCreditCard className="fs-3" />,
+      description: 'Visa, Mastercard, American Express'
+    },
+    {
+      id: 'bank',
+      name: 'Bank Transfer',
+      icon: <FaUniversity className="fs-3" />,
+      description: 'Direct bank account transfer'
+    },
+    {
+      id: 'upi',
+      name: 'UPI',
+      icon: <FaMobileAlt className="fs-3" />,
+      description: 'Google Pay, PhonePe, Paytm'
+    },
+    {
+      id: 'netbanking',
+      name: 'Net Banking',
+      icon: <FaWallet className="fs-3" />,
+      description: 'Online banking through your bank'
+    }
+  ];
+
+  const handleMethodSelect = (methodId) => {
+    setSelectedMethod(methodId);
+    // Notify parent component about the selected method
+    if (onMethodSelect) {
+      onMethodSelect(methodId);
+    }
+    setFormData({
+      cardNumber: '',
+      cardHolder: '',
+      expiryDate: '',
+      cvv: '',
+      bankName: '',
+      accountNumber: '',
+      walletEmail: '',
+      phoneNumber: '',
+    });
+    setFormErrors({});
+    setStep('form');
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    // Clear error for this field when user starts typing
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (selectedMethod === 'card') {
+      if (!formData.cardNumber || formData.cardNumber.replace(/\s/g, '').length < 13) {
+        errors.cardNumber = 'Please enter a valid card number';
+      }
+      if (!formData.cardHolder) {
+        errors.cardHolder = 'Please enter cardholder name';
+      }
+      if (!formData.expiryDate || !/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
+        errors.expiryDate = 'Please enter expiry date (MM/YY)';
+      }
+      if (!formData.cvv || formData.cvv.length < 3) {
+        errors.cvv = 'Please enter a valid CVV';
+      }
+    } else if (selectedMethod === 'bank') {
+      if (!formData.bankName) {
+        errors.bankName = 'Please enter your bank name';
+      }
+      if (!formData.accountNumber || formData.accountNumber.length < 10) {
+        errors.accountNumber = 'Please enter a valid account number';
+      }
+    } else if (selectedMethod === 'upi') {
+      if (!formData.phoneNumber || !/^\d{10}$/.test(formData.phoneNumber)) {
+        errors.phoneNumber = 'Please enter a valid 10-digit phone number';
+      }
+    } else if (selectedMethod === 'netbanking') {
+      if (!formData.bankName) {
+        errors.bankName = 'Please select your bank';
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmitForm = () => {
+    if (validateForm()) {
+      setStep('confirm');
+    }
+  };
+
+  const handleConfirmPayment = () => {
+    // Pass redemption points to parent
+    if (onRedemptionChange) {
+      onRedemptionChange(redemptionPoints);
+    }
+    onConfirm(redemptionPoints);
+    setStep('method');
+    setSelectedMethod(null);
+    setRedemptionPoints(0);
+  };
+
+  const getMethodIcon = (methodId) => {
+    const method = paymentMethods.find(m => m.id === methodId);
+    return method?.icon;
+  };
+
+  const getMethodName = (methodId) => {
+    const method = paymentMethods.find(m => m.id === methodId);
+    return method?.name;
+  };
+
+  return (
+    <Modal show={show} onHide={onHide} centered backdrop="static" size="lg">
+      {/* STEP 1: SELECT PAYMENT METHOD */}
+      {step === 'method' && (
+        <>
+          <Modal.Header closeButton className="border-0 pb-0">
+            <Modal.Title className="fw-bold">
+              <span className="badge bg-primary me-2">Step 1</span>Select Payment Method
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="p-4">
+            {/* Phase 3: Extras Section */}
+            <div className="mb-4">
+                <h6 className="fw-bold mb-3">Enhance Your Stay</h6>
+                <div className="row g-3">
+                    <div className="col-md-6">
+                        <div className={`card border-2 rounded-4 p-3 cursor-pointer transition-all ${extras.breakfast ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
+                             onClick={() => setExtras({...extras, breakfast: !extras.breakfast})}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <FaUtensils className={extras.breakfast ? 'text-primary' : 'text-muted'} />
+                                <Form.Check type="switch" checked={extras.breakfast} readOnly />
+                            </div>
+                            <div className="fw-bold mt-2">Daily Breakfast</div>
+                            <small className="text-muted">₹500 / day</small>
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className={`card border-2 rounded-4 p-3 cursor-pointer transition-all ${extras.airportPickup ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
+                             onClick={() => setExtras({...extras, airportPickup: !extras.airportPickup})}>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <FaPlaneDeparture className={extras.airportPickup ? 'text-primary' : 'text-muted'} />
+                                <Form.Check type="switch" checked={extras.airportPickup} readOnly />
+                            </div>
+                            <div className="fw-bold mt-2">Airport Pickup</div>
+                            <small className="text-muted">₹1,200 fixed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Booking Summary */}
+            <div className="bg-light rounded-3 p-3 mb-4">
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">Base Amount:</span>
+                <span>₹{(bookingDetails?.base || 0).toLocaleString()}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">Tax (12%):</span>
+                <span>₹{(bookingDetails?.tax || 0).toLocaleString()}</span>
+              </div>
+              {redemptionDiscount > 0 && (
+                <div className="d-flex justify-content-between mb-2 text-success">
+                  <span>Redemption Discount:</span>
+                  <span>-₹{redemptionDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              <hr className="my-2" />
+              <div className="d-flex justify-content-between fw-bold">
+                <span>Total Amount:</span>
+                <span className="text-primary">₹{actualFinalTotal.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Redemption Points Section */}
+            {redemptionPointsBalance > 0 && (
+              <div className="bg-warning bg-opacity-10 border border-warning rounded-3 p-3 mb-4">
+                <div className="d-flex align-items-center mb-3">
+                  <FaGift className="text-warning fs-4 me-2" />
+                  <div>
+                    <h6 className="mb-0 fw-bold">Use Redemption Points</h6>
+                    <small className="text-muted">You have {redemptionPointsBalance} redemption points available</small>
+                  </div>
+                </div>
+                <Form.Group>
+                  <Form.Label className="small fw-bold text-muted">Enter points to redeem (max 500):</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="0"
+                    value={redemptionPoints || ''}
+                    onChange={handleRedemptionChange}
+                    max={500}
+                    min={0}
+                    className="rounded-2"
+                  />
+                  {redemptionError && <Form.Text className="text-danger">{redemptionError}</Form.Text>}
+                  <div className="mt-2">
+                    <small className="text-muted">
+                      1 point = ₹1 discount. Max 500 points per booking.
+                    </small>
+                  </div>
+                </Form.Group>
+              </div>
+            )}
+
+            {/* Payment Methods Grid */}
+            <p className="small text-muted mb-3">Choose your preferred payment method:</p>
+            <div className="row g-3">
+              {paymentMethods.map(method => (
+                <div key={method.id} className="col-md-6">
+                  <button
+                    onClick={() => handleMethodSelect(method.id)}
+                    className="w-100 border-2 rounded-3 p-3 text-start transition-all"
+                    style={{
+                      borderColor: '#e0e0e0',
+                      backgroundColor: '#fff',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#007bff';
+                      e.currentTarget.style.backgroundColor = '#f8f9ff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#e0e0e0';
+                      e.currentTarget.style.backgroundColor = '#fff';
+                    }}
+                  >
+                    <div className="text-primary mb-2">{method.icon}</div>
+                    <div className="fw-bold text-dark">{method.name}</div>
+                    <small className="text-muted">{method.description}</small>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-0 pt-0">
+            <Button variant="light" onClick={onHide} className="rounded-pill px-4">
+              Cancel
+            </Button>
+          </Modal.Footer>
+        </>
+      )}
+
+      {/* STEP 2: ENTER PAYMENT DETAILS */}
+      {step === 'form' && (
+        <>
+          <Modal.Header className="border-0 pb-0">
+            <button
+              onClick={() => setStep('method')}
+              className="btn btn-light rounded-circle p-2"
+              style={{ width: '40px', height: '40px' }}
+            >
+              <FaArrowLeft />
+            </button>
+            <Modal.Title className="fw-bold ms-2">
+              <span className="badge bg-primary me-2">Step 2</span>Payment Details
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="p-4">
+            {/* Selected Method Display */}
+            <div className="d-flex align-items-center mb-4 p-3 bg-light rounded-3">
+              <div className="text-primary me-3">{getMethodIcon(selectedMethod)}</div>
+              <div>
+                <div className="small text-muted"> Payment Method</div>
+                <div className="fw-bold">{getMethodName(selectedMethod)}</div>
+              </div>
+            </div>
+
+            {/* CREDIT CARD FORM */}
+            {selectedMethod === 'card' && (
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Card Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="cardNumber"
+                    placeholder="1234 5678 9012 3456"
+                    value={formData.cardNumber}
+                    onChange={handleInputChange}
+                    maxLength="19"
+                    autoComplete="cc-number"
+                    className={`rounded-2 ${formErrors.cardNumber ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.cardNumber && <Form.Text className="text-danger">{formErrors.cardNumber}</Form.Text>}
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Cardholder Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="cardHolder"
+                    placeholder="John Doe"
+                    value={formData.cardHolder}
+                    onChange={handleInputChange}
+                    autoComplete="cc-name"
+                    className={`rounded-2 ${formErrors.cardHolder ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.cardHolder && <Form.Text className="text-danger">{formErrors.cardHolder}</Form.Text>}
+                </Form.Group>
+
+                <div className="row">
+                  <div className="col-md-6">
+                    <Form.Group className="mb-3">
+                      <Form.Label className="small fw-bold text-muted">Expiry Date</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="expiryDate"
+                        placeholder="MM/YY"
+                        value={formData.expiryDate}
+                        onChange={handleInputChange}
+                        maxLength="5"
+                        autoComplete="cc-exp"
+                        className={`rounded-2 ${formErrors.expiryDate ? 'is-invalid' : ''}`}
+                      />
+                      {formErrors.expiryDate && <Form.Text className="text-danger">{formErrors.expiryDate}</Form.Text>}
+                    </Form.Group>
+                  </div>
+                  <div className="col-md-6">
+                    <Form.Group className="mb-3">
+                      <Form.Label className="small fw-bold text-muted">CVV</Form.Label>
+                      <Form.Control
+                        type="password"
+                        name="cvv"
+                        placeholder="123"
+                        value={formData.cvv}
+                        onChange={handleInputChange}
+                        maxLength="4"
+                        autoComplete="cc-csc"
+                        className={`rounded-2 ${formErrors.cvv ? 'is-invalid' : ''}`}
+                      />
+                      {formErrors.cvv && <Form.Text className="text-danger">{formErrors.cvv}</Form.Text>}
+                    </Form.Group>
+                  </div>
+                </div>
+              </Form>
+            )}
+
+            {/* BANK TRANSFER FORM */}
+            {selectedMethod === 'bank' && (
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Bank Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="bankName"
+                    placeholder="e.g., ICICI Bank, HDFC Bank"
+                    value={formData.bankName}
+                    onChange={handleInputChange}
+                    autoComplete="organization"
+                    className={`rounded-2 ${formErrors.bankName ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.bankName && <Form.Text className="text-danger">{formErrors.bankName}</Form.Text>}
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Account Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="accountNumber"
+                    placeholder="1234567890"
+                    value={formData.accountNumber}
+                    onChange={handleInputChange}
+                    autoComplete="off"
+                    className={`rounded-2 ${formErrors.accountNumber ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.accountNumber && <Form.Text className="text-danger">{formErrors.accountNumber}</Form.Text>}
+                </Form.Group>
+
+                <div className="alert alert-info small mt-3">
+                  <strong>Note:</strong> You will be redirected to your bank's website to complete the transfer securely.
+                </div>
+              </Form>
+            )}
+
+            {/* WALLET FORM */}
+            {selectedMethod === 'wallet' && (
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Wallet Email/Account</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="walletEmail"
+                    placeholder="your.email@example.com"
+                    value={formData.walletEmail}
+                    onChange={handleInputChange}
+                    autoComplete="email"
+                    className={`rounded-2 ${formErrors.walletEmail ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.walletEmail && <Form.Text className="text-danger">{formErrors.walletEmail}</Form.Text>}
+                </Form.Group>
+
+                <div className="alert alert-info small mt-3">
+                  <strong>Supported Wallets:</strong> Google Pay, Apple Pay, PayPal, Amazon Pay
+                </div>
+              </Form>
+            )}
+
+            {/* UPI FORM */}
+            {selectedMethod === 'upi' && (
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Phone Number</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="9876543210"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    maxLength="10"
+                    autoComplete="tel"
+                    className={`rounded-2 ${formErrors.phoneNumber ? 'is-invalid' : ''}`}
+                  />
+                  {formErrors.phoneNumber && <Form.Text className="text-danger">{formErrors.phoneNumber}</Form.Text>}
+                </Form.Group>
+
+                <div className="alert alert-info small mt-3">
+                  <strong>Note:</strong> You will receive a payment request on your UPI app.
+                </div>
+              </Form>
+            )}
+
+            {/* NET BANKING FORM */}
+            {selectedMethod === 'netbanking' && (
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label className="small fw-bold text-muted">Select Bank</Form.Label>
+                  <Form.Select
+                    name="bankName"
+                    value={formData.bankName}
+                    onChange={handleInputChange}
+                    autoComplete="off"
+                    className={`rounded-2 ${formErrors.bankName ? 'is-invalid' : ''}`}
+                  >
+                    <option value="">Select your bank</option>
+                    <option value="SBI">State Bank of India</option>
+                    <option value="HDFC">HDFC Bank</option>
+                    <option value="ICICI">ICICI Bank</option>
+                    <option value="Axis">Axis Bank</option>
+                    <option value="Kotak">Kotak Mahindra Bank</option>
+                    <option value="Yes Bank">Yes Bank</option>
+                    <option value="IDBI">IDBI Bank</option>
+                    <option value="PNB">Punjab National Bank</option>
+                  </Form.Select>
+                  {formErrors.bankName && <Form.Text className="text-danger">{formErrors.bankName}</Form.Text>}
+                </Form.Group>
+
+                <div className="alert alert-info small mt-3">
+                  <strong>Note:</strong> You will be redirected to your bank's secure login page.
+                </div>
+              </Form>
+            )}
+
+            {/* Amount Summary */}
+            <div className="bg-light rounded-3 p-3 mt-4">
+              <div className="d-flex justify-content-between fw-bold">
+                <span>Amount to Pay:</span>
+                <span className="text-primary">₹{actualFinalTotal.toLocaleString()}</span>
+              </div>
+              {redemptionDiscount > 0 && (
+                <div className="d-flex justify-content-between text-success mt-2">
+                  <small>Redemption Discount Applied:</small>
+                  <small>-₹{redemptionDiscount.toLocaleString()}</small>
+                </div>
+              )}
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-0 pt-0">
+            <Button variant="light" onClick={() => setStep('method')} className="rounded-pill px-4">
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSubmitForm}
+              className="rounded-pill px-4 fw-bold"
+            >
+              Continue to Confirm
+            </Button>
+          </Modal.Footer>
+        </>
+      )}
+
+      {/* STEP 3: CONFIRMATION */}
+      {step === 'confirm' && (
+        <>
+          <Modal.Header className="border-0 pb-0">
+            <Modal.Title className="fw-bold">
+              <span className="badge bg-primary me-2">Step 3</span>Confirm Payment
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="p-4">
+            {/* Success Icon */}
+            <div className="text-center mb-4">
+              <div className="bg-light rounded-circle p-4 d-inline-block">
+                <FaCheck className="fs-1 text-success" />
+              </div>
+            </div>
+
+            {/* Booking Summary */}
+            <div className="bg-light rounded-3 p-3 mb-4">
+              <h6 className="fw-bold mb-3">Booking Summary</h6>
+              <div className="d-flex justify-content-between mb-2">
+                <span className="text-muted">Base Amount:</span>
+                <span>₹{(bookingDetails?.base || 0).toLocaleString()}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-3">
+                <span className="text-muted">Tax (12%):</span>
+                <span>₹{(bookingDetails?.tax || 0).toLocaleString()}</span>
+              </div>
+              {redemptionDiscount > 0 && (
+                <div className="d-flex justify-content-between mb-3 text-success">
+                  <span>Redemption Discount:</span>
+                  <span>-₹{redemptionDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              <hr className="my-2" />
+              <div className="d-flex justify-content-between fw-bold">
+                <span>Total Amount:</span>
+                <span className="text-primary">₹{actualFinalTotal.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="mb-4 p-3 border rounded-3">
+              <small className="text-muted">Payment Method</small>
+              <div className="d-flex align-items-center mt-2">
+                <div className="text-primary me-2 fs-5">{getMethodIcon(selectedMethod)}</div>
+                <div className="fw-bold">{getMethodName(selectedMethod)}</div>
+              </div>
+            </div>
+
+            {/* Loyalty Points */}
+            <div className="bg-success bg-opacity-10 border border-success rounded-3 p-3 mb-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Loyalty Points</small>
+                  <div className="fw-bold text-success">You will earn {pointsToEarn} points</div>
+                  {redemptionPoints > 0 && (
+                    <div className="text-warning small mt-1">
+                      Using {redemptionPoints} redemption points for ₹{redemptionDiscount} discount
+                    </div>
+                  )}
+                </div>
+                <div className="fs-5">⭐</div>
+              </div>
+            </div>
+
+            {/* Terms */}
+            <div className="form-check mb-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="termsCheck"
+                defaultChecked
+              />
+              <label className="form-check-label small" htmlFor="termsCheck">
+                I agree to the terms of service and authorize this payment
+              </label>
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-0 pt-0">
+            <Button variant="light" onClick={() => setStep('form')} className="rounded-pill px-4">
+              Edit Payment
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleConfirmPayment}
+              className="rounded-pill px-4 fw-bold"
+            >
+              <FaCheck className="me-2" />
+              Confirm & Pay ₹{actualFinalTotal.toLocaleString()}
+            </Button>
+          </Modal.Footer>
+        </>
+      )}
+    </Modal>
+  );
+};
+
+export default PaymentModal;
