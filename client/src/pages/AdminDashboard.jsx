@@ -35,7 +35,6 @@ import AdminUserSection from "../components/features/admin/AdminUserSection";
 import AdminHotelSection from "../components/features/admin/AdminHotelSection";
 import AdminBookingSection from "../components/features/admin/AdminBookingSection";
 import AdminReviewSection from "../components/features/admin/AdminReviewSection";
-import AdminAnalyticsSection from "../components/features/admin/AdminAnalyticsSection";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -186,7 +185,6 @@ const AdminDashboard = () => {
     { id: "hotels", icon: <FaHotel />, label: "Hotels" },
     { id: "bookings", icon: <FaCalendarCheck />, label: "Bookings" },
     { id: "reviews", icon: <FaClipboardList />, label: "Reviews" },
-    { id: "analytics", icon: <FaChartBar />, label: "Analytics" },
   ];
 
   return (
@@ -195,14 +193,14 @@ const AdminDashboard = () => {
         <div className="container">
           {/* Header */}
           <div className="position-relative">
-            <DashboardHeader 
+            <DashboardHeader
               title="Admin Central Command"
               subtitle="Global oversight of users and property listings"
               icon={FaChartBar}
               onAccountClick={() => navigate('/account')}
               onLogoutClick={handleLogout}
             />
-            <button 
+            <button
               className="btn btn-sm btn-light position-absolute top-0 end-0 mt-2 me-2 rounded-circle shadow-sm d-none d-md-flex align-items-center justify-content-center"
               style={{ width: '32px', height: '32px', zIndex: 5 }}
               onClick={loadData}
@@ -213,14 +211,14 @@ const AdminDashboard = () => {
           </div>
 
           {/* Tab Navigation */}
-          <DashboardTabs 
+          <DashboardTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={(id) => { setActiveTab(id); setSearchTerm(""); }}
           />
 
           {/* Search Bar */}
-          <DashboardSearch 
+          <DashboardSearch
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             placeholder={`Search ${activeTab}...`}
@@ -245,7 +243,7 @@ const AdminDashboard = () => {
               )}
 
               {!loading && activeTab === "customers" && (
-                <AdminUserSection 
+                <AdminUserSection
                   title="Registered Customers"
                   users={filteredCustomers}
                   type="customer"
@@ -255,7 +253,7 @@ const AdminDashboard = () => {
               )}
 
               {!loading && activeTab === "managers" && (
-                <AdminUserSection 
+                <AdminUserSection
                   title="Hotel Managers"
                   users={filteredManagers}
                   type="manager"
@@ -265,7 +263,7 @@ const AdminDashboard = () => {
               )}
 
               {!loading && activeTab === "admins" && (
-                <AdminUserSection 
+                <AdminUserSection
                   title="System Administrators"
                   users={filteredAdmins}
                   type="admin"
@@ -275,14 +273,14 @@ const AdminDashboard = () => {
               )}
 
               {!loading && activeTab === "hotels" && (
-                <AdminHotelSection 
+                <AdminHotelSection
                   hotels={filteredHotels}
                   onDelete={handleDeleteHotel}
                 />
               )}
 
               {!loading && activeTab === "bookings" && (
-                <AdminBookingSection 
+                <AdminBookingSection
                   bookings={filteredBookings}
                   onApprove={handleApproveBooking}
                   onReject={handleRejectBooking}
@@ -290,15 +288,9 @@ const AdminDashboard = () => {
               )}
 
               {!loading && activeTab === "reviews" && (
-                <AdminReviewSection 
+                <AdminReviewSection
                   reviews={filteredReviews}
                   onDelete={handleDeleteReview}
-                />
-              )}
-
-              {!loading && activeTab === "analytics" && (
-                <AdminAnalyticsSection 
-                  hotels={mostBookedHotels}
                 />
               )}
             </div>
