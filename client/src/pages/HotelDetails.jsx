@@ -31,6 +31,13 @@ const HotelDetails = () => {
     return roomsByHotel.filter(r => (r.availability ?? r.Availability) === true).length;
   }, [roomsByHotel]);
 
+  // Calculate minimum room price
+  const minRoomPrice = useMemo(() => {
+    if (!roomsByHotel || roomsByHotel.length === 0) return hotel?.minPrice || 0;
+    const prices = roomsByHotel.map(room => room.price);
+    return Math.min(...prices);
+  }, [roomsByHotel, hotel]);
+
   // 2. Fetch Data on Mount
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,7 +57,7 @@ const HotelDetails = () => {
   const handleQuickBook = () => {
     // Check if any room is actually available
     const roomsWithAvailability = roomsByHotel.filter(r => r.availability === true);
-    
+
     if (roomsWithAvailability.length > 0) {
       // Scroll to the Room Selection Section
       const roomsSection = document.getElementById('rooms');
@@ -99,13 +106,13 @@ const HotelDetails = () => {
       <main className="flex-grow-1">
         {/* Hero Section */}
         <section className="position-relative mb-5" style={{ height: "60vh", minHeight: "400px" }}>
-          <img 
-            src={hotel.image} 
-            alt={hotel.name} 
+          <img
+            src={hotel.image}
+            alt={hotel.name}
             className="w-100 h-100 object-fit-cover"
           />
           <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%)" }}></div>
-          
+
           <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 text-white">
             <div className="container">
               <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
@@ -201,7 +208,7 @@ const HotelDetails = () => {
                     <span className="badge bg-dark px-3 py-2 rounded-pill">{availableRoomsCount} rooms left</span>
                   )}
                 </div>
-                
+
                 {roomsLoading ? (
                   <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status"></div>
@@ -220,7 +227,7 @@ const HotelDetails = () => {
                 <div className="card-body p-4">
                   <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                      <span className="h3 fw-bold mb-0">₹{hotel.minPrice?.toLocaleString() || "3,500"}</span>
+                      <span className="h3 fw-bold mb-0">₹{minRoomPrice > 0 ? minRoomPrice.toLocaleString() : "---"}</span>
                       <span className="text-muted ms-1">/ night</span>
                     </div>
                     <div className="text-end">
@@ -235,14 +242,14 @@ const HotelDetails = () => {
                     </div>
                   </div>
 
-                  <button 
-                    onClick={handleQuickBook} 
+                  <button
+                    onClick={handleQuickBook}
                     className="btn btn-primary w-100 py-3 fw-bold rounded-3 mb-3 shadow-sm"
                     disabled={role !== 'guest'}
                   >
                     {role !== 'guest' ? 'Booking Restricted' : 'Check Availability'}
                   </button>
-                  
+
                   <p className="text-center text-muted small mb-4">You won't be charged yet</p>
 
                   <div className="bg-light rounded-3 p-3 mb-0">
@@ -262,7 +269,7 @@ const HotelDetails = () => {
           </section>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
