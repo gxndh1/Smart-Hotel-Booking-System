@@ -52,11 +52,11 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
               <React.Fragment key={hotelId}>
                 <tr className={expandedHotel === hotelId ? 'table-primary table-opacity-10' : ''}>
                   <td className="ps-4">
-                    <img 
-                      src={getImage(hotel)} 
-                      alt={getName(hotel)} 
-                      width="60" 
-                      height="40" 
+                    <img
+                      src={getImage(hotel)}
+                      alt={getName(hotel)}
+                      width="60"
+                      height="40"
                       className="rounded shadow-sm object-fit-cover"
                       onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'; }}
                     />
@@ -74,7 +74,7 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
                     <td>
                       {getManager(hotel) ? (
                         <div className="small">
-                          <div className="fw-bold"><FaUserTie className="me-1 text-primary"/>{getManager(hotel).name || 'Manager'}</div>
+                          <div className="fw-bold"><FaUserTie className="me-1 text-primary" />{getManager(hotel).name || 'Manager'}</div>
                           <div className="text-muted">{getManager(hotel).email}</div>
                         </div>
                       ) : <span className="badge bg-secondary">Unassigned</span>}
@@ -82,7 +82,7 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
                   )}
                   <td>
                     <div className="d-flex align-items-center gap-1">
-                      <FaStar className="text-warning"/>
+                      <FaStar className="text-warning" />
                       <span className="fw-bold">{getRating(hotel).toFixed(1)}</span>
                     </div>
                   </td>
@@ -99,14 +99,14 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
                       <button className="btn btn-outline-secondary" onClick={() => toggleExpand(hotelId)} title="View Details">
                         <FaEye />
                       </button>
-                      {(isManager || isAdmin) && (
+                      {isManager && (
                         <button className="btn btn-outline-primary" onClick={() => handleEdit(hotel)} title="Edit Hotel">
                           <FaEdit />
                         </button>
                       )}
-                      <button 
-                        className="btn btn-outline-danger" 
-                        onClick={() => window.confirm(`Delete ${getName(hotel)}?`) && onDelete(hotelId)} 
+                      <button
+                        className="btn btn-outline-danger"
+                        onClick={() => window.confirm(`Delete ${getName(hotel)}?`) && onDelete(hotelId)}
                         title="Delete Hotel"
                       >
                         <FaTrash />
