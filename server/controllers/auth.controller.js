@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 // Generate JWT Token
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET || 'smart_hotel_booking_system', {
-    expiresIn: process.env.JWT_EXPIRE || '7d',
+    expiresIn: process.env.JWT_EXPIRE || '2d',
   });
 };
 
@@ -107,7 +107,7 @@ export const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 2 * 24 * 60 * 60 * 1000 // 2 days
     });
 
     const userResponse = user.toObject();
@@ -136,7 +136,7 @@ export const logout = async (req, res) => {
     path: '/',
     expires: new Date(0) // Immediately expire the cookie
   });
-  
+
   return res.status(200).json({
     success: true,
     message: 'Logged out successfully'
@@ -149,7 +149,7 @@ export const logout = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
