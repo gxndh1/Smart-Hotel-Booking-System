@@ -13,7 +13,7 @@ const RoleBadge = ({ role }) => {
     guest: { color: "info", icon: <FaUser className="me-1" />, label: "Guest" }
   };
   const config = roles[role?.toLowerCase()] || roles.guest;
-  
+
   return (
     <span className={`badge bg-${config.color}-subtle text-${config.color} border border-${config.color}-subtle px-3 rounded-pill`}>
       {config.icon} {config.label}
@@ -65,46 +65,7 @@ const UserManagementTable = ({ users, type, onDelete, onRoleChange }) => {
                 </td>
                 <td className="px-4">
                   <div className="d-flex gap-2 justify-content-end">
-                    {/* Role Change Dropdown */}
-                    {type !== "admin" && (
-                      <div className="dropdown">
-                        <button
-                          className="btn btn-sm btn-light border dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                          title="Change Role"
-                        >
-                          <FaEdit className="text-primary" />
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => handleRoleChange(getId(user), 'guest')}
-                            >
-                              <FaUser className="me-2"/> Set as Guest
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => handleRoleChange(getId(user), 'manager')}
-                            >
-                              <FaUserTie className="me-2"/> Set as Manager
-                            </button>
-                          </li>
-                          <li>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => handleRoleChange(getId(user), 'admin')}
-                            >
-                              <FaUserShield className="me-2"/> Set as Admin
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                    {/* Role Change Dropdown Removed */}
                     {/* Delete Button */}
                     {type !== "admin" && (
                       <button
