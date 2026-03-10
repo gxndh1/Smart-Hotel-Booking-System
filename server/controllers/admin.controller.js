@@ -181,18 +181,21 @@ export const getAllHotels = async (req, res) => {
       .populate('managerId', 'name email contactNumber')
       .sort({ createdAt: -1 });
 
-    // Get room count and booking count for each hotel
     const hotelsWithStats = await Promise.all(
       hotels.map(async (hotel) => {
-        const roomCount = await Room.countDocuments({ hotelId: hotel._id });
+        // Calculate true total room inventory (tallying the capacity or totalRooms field, defaulting to 1 per room listing)
+        const roomsForHotel = await Room.find({ hotelId: hotel._id });
+        const totalRoomsCount = roomsForHotel.reduce((acc, room) => acc + (room.totalRooms || room.TotalRooms || 1), 0);
+
         const bookingCount = await Booking.countDocuments({
-          roomId: { $in: await Room.find({ hotelId: hotel._id }).select('_id') }
+          roomId: { $in: roomsForHotel.map(r => r._id) }
         });
+
         const hotelObj = hotel.toObject();
         return {
           ...hotelObj,
           manager: hotelObj.managerId,
-          roomCount,
+          totalRoomsCount,
           bookingCount
         };
       })
@@ -437,7 +440,10 @@ export const getDashboardStats = async (req, res) => {
       User.countDocuments({ role: 'manager' }),
       User.countDocuments({ role: 'admin' }),
       Hotel.countDocuments(),
-      Room.countDocuments(),
+      (async () => {
+        const rooms = await Room.find({});
+        return rooms.reduce((acc, room) => acc + (room.totalRooms || room.TotalRooms || 1), 0);
+      })(),
       Booking.countDocuments(),
       Booking.countDocuments({ status: 'confirmed' }),
       Booking.countDocuments({ status: 'cancelled' }),
