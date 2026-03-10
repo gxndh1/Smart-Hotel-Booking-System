@@ -168,7 +168,26 @@ export const getBookings = async (req, res) => {
       })
       .populate('userId', 'name email');
 
-    return res.status(200).json({ success: true, data: bookings });
+    const enrichedBookings = bookings.map(booking => {
+      // Calculate total nights
+      const checkIn = new Date(booking.checkInDate);
+      const checkOut = new Date(booking.checkOutDate);
+      const totalNights = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+
+      // Calculate price
+      const roomPrice = booking.roomId?.price || 0;
+      const basePrice = roomPrice * totalNights * booking.numberOfRooms;
+      const tax = basePrice * 0.12;
+      const extrasAmount = booking.extrasAmount || 0;
+      const totalPrice = basePrice + tax + extrasAmount - (booking.redemptionDiscountAmount || 0);
+
+      return {
+        ...booking.toObject(),
+        totalPrice
+      };
+    });
+
+    return res.status(200).json({ success: true, data: enrichedBookings });
   } catch (error) {
     console.error('Get bookings error:', error);
     return res.status(500).json({ success: false, message: error.message || 'Server error' });
