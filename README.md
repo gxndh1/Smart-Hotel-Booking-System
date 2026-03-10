@@ -1,20 +1,16 @@
 # Smart Hotel Management System
 
-This repository is now rooted at the `Smart-Hotel-Booking-System` directory. It contains two main subfolders:
+SERVER
+PORT=5600
+NODE_ENV=development
+MONGO_URL=mongodb://localhost:27017/smart_hotel_booking
+JWT_SECRET=e994264431a1a8e4314e25df0da5e12ce12f39b750d43d2825e132d611297a7e26563548e2c23601f006b150033b89f89fe4a00f842d0eabd182908b9bb381aa
+JWT_EXPIRE=2d
+FRONTEND_URL=http://localhost:5173
+PAYMENT_GATEWAY_MODE=sandbox
+LOYALTY_POINTS_RATE=1
+POINTS_VALUE=1
 
-* `client` – the frontend React/Vite application
-* `server` – the backend Node/Express API
-
-Each folder has its own `package.json` and can be developed and deployed independently. There is no integration yet – the structure simply separates client and server code for version control.
-
-To start working:
-
-```bash
-# frontend
-cd client && npm install && npm run dev
-
-# backend
-cd ../server && npm install && npm start
-```
-
-You shouldn't need to rename or remove anything now; this README and a `.gitignore` live at the repository root (`Smart-Hotel-Booking-System`).
+CLIENT
+VITE_API_URL=http://localhost:5600
+ 
