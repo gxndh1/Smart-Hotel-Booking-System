@@ -234,9 +234,10 @@ export const updateHotel = async (req, res) => {
     }
 
     const isOwner = hotel.managerId.toString() === req.user.id;
+    const isAdmin = req.user.role === 'admin';
 
-    if (!isOwner) {
-      return res.status(403).json({ success: false, message: 'Only the property manager can update this hotel' });
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'Only the property manager or an admin can update this hotel' });
     }
 
     const { name, location, description, amenities, image } = req.body;
@@ -267,9 +268,10 @@ export const deleteHotel = async (req, res) => {
     }
 
     const isOwner = hotel.managerId.toString() === req.user.id;
+    const isAdmin = req.user.role === 'admin';
 
-    if (!isOwner) {
-      return res.status(403).json({ success: false, message: 'Only the property manager can delete this hotel' });
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ success: false, message: 'Only the property manager or an admin can delete this hotel' });
     }
 
     // FIX: Complete cascade deletion - delete all related data
