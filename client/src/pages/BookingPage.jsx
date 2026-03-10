@@ -10,10 +10,10 @@ import { fetchUserLoyalty, selectRedemptionPoints } from "../redux/loyaltySlice"
 import BookingForm from "../components/features/booking/BookingForm";
 import NavBar from "../components/layout/NavBar";
 import Footer from "../components/layout/Footer";
-import { 
-  FaCheck, FaUserFriends, FaCreditCard, FaClipboardCheck, 
-  FaUtensils, FaPlaneDeparture, FaArrowLeft, FaUniversity, 
-  FaMobileAlt, FaWallet, FaGift, FaShieldAlt 
+import {
+  FaCheck, FaUserFriends, FaCreditCard, FaClipboardCheck,
+  FaUtensils, FaPlaneDeparture, FaArrowLeft, FaUniversity,
+  FaMobileAlt, FaWallet, FaGift, FaShieldAlt
 } from "react-icons/fa";
 
 const BookingPage = () => {
@@ -72,8 +72,8 @@ const BookingPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!isAuthenticated) {
-      navigate("/login", { 
-        state: { redirectTo: `/booking/${hotelId}/${roomId}`, message: "Please login to book a hotel" } 
+      navigate("/login", {
+        state: { redirectTo: `/booking/${hotelId}/${roomId}`, message: "Please login to book a hotel" }
       });
     }
   }, [isAuthenticated, hotelId, roomId, navigate]);
@@ -101,10 +101,10 @@ const BookingPage = () => {
     const numberOfRooms = bookingSummary?.numberOfRooms || 1;
     const base = (room.price ?? room.Price ?? 0) * nights * numberOfRooms;
     const tax = base * 0.12;
-    
-    const extrasTotal = (extras.breakfast ? 500 * nights * numberOfRooms : 0) + 
-                        (extras.airportPickup ? 1200 : 0);
-    
+
+    const extrasTotal = (extras.breakfast ? 500 * nights * numberOfRooms : 0) +
+      (extras.airportPickup ? 1200 : 0);
+
     const redemptionDiscount = redemptionPointsUsed;
     const total = base + tax + extrasTotal - redemptionDiscount;
     return { base, tax, total: total > 0 ? total : 0, numberOfRooms, nights, redemptionDiscount, extrasTotal };
@@ -149,11 +149,11 @@ const BookingPage = () => {
       const usedRedemptionPoints = redemptionPointsUsed;
       const userId = currentUser?._id || currentUser?.id;
 
-      const checkInDate = bookingSummary.checkIn instanceof Date 
-        ? bookingSummary.checkIn.toISOString() 
+      const checkInDate = bookingSummary.checkIn instanceof Date
+        ? bookingSummary.checkIn.toISOString()
         : String(bookingSummary.checkIn);
-      const checkOutDate = bookingSummary.checkOut instanceof Date 
-        ? bookingSummary.checkOut.toISOString() 
+      const checkOutDate = bookingSummary.checkOut instanceof Date
+        ? bookingSummary.checkOut.toISOString()
         : String(bookingSummary.checkOut);
 
       const redemptionDiscount = usedRedemptionPoints;
@@ -173,7 +173,8 @@ const BookingPage = () => {
         redemptionPointsUsed: usedRedemptionPoints,
         redemptionDiscountAmount: redemptionDiscount,
         extras: selectedExtras,
-        extrasAmount: priceCalculation.extrasTotal
+        extrasAmount: priceCalculation.extrasTotal,
+        additionalGuests: bookingSummary.additionalGuests || []
       };
 
       const bookingResult = await dispatch(createBooking(newBooking)).unwrap();
@@ -188,7 +189,7 @@ const BookingPage = () => {
         'netbanking': 'Net Banking'
       };
       const paymentMethodName = paymentMethodNames[selectedPaymentMethod] || 'Credit/Debit Card';
-      
+
       const paymentResult = await dispatch(createPayment({
         bookingId: savedBookingId,
         userId: userId, // Backend uses req.user.id, but we pass this for consistency
@@ -240,19 +241,18 @@ const BookingPage = () => {
   return (
     <div className="bg-white min-vh-100">
       <NavBar />
-      
+
       {/* Modern Stepper */}
       <div className="bg-light border-bottom py-4 mb-5 sticky-top" style={{ top: '70px', zIndex: 100 }}>
         <div className="container">
           <div className="d-flex justify-content-between position-relative" style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div className="position-absolute top-50 start-0 translate-middle-y w-100 bg-secondary bg-opacity-25" style={{ height: '2px', zIndex: 0 }}></div>
             <div className="position-absolute top-50 start-0 translate-middle-y bg-primary transition-all" style={{ height: '2px', width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`, zIndex: 1 }}></div>
-            
+
             {steps.map((step) => (
               <div key={step.id} className="text-center position-relative" style={{ zIndex: 2 }}>
-                <div className={`rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 transition-all ${
-                  currentStep >= step.id ? 'bg-primary text-white shadow' : 'bg-white text-muted border'
-                }`} style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
+                <div className={`rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 transition-all ${currentStep >= step.id ? 'bg-primary text-white shadow' : 'bg-white text-muted border'
+                  }`} style={{ width: '40px', height: '40px', fontWeight: 'bold' }}>
                   {currentStep > step.id ? <FaCheck size={14} /> : step.id}
                 </div>
                 <span className={`small fw-bold ${currentStep >= step.id ? 'text-dark' : 'text-muted'}`}>{step.label}</span>
@@ -275,8 +275,8 @@ const BookingPage = () => {
                   hotel={hotel}
                   room={room}
                   user={{
-                    ...currentUser, 
-                    name: currentUser?.name || currentUser?.Name, 
+                    ...currentUser,
+                    name: currentUser?.name || currentUser?.Name,
                     email: currentUser?.email || currentUser?.Email,
                     phone: currentUser?.contactNumber || currentUser?.ContactNumber || currentUser?.phone
                   }}
@@ -304,7 +304,7 @@ const BookingPage = () => {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <div className={`card border-2 rounded-4 p-3 cursor-pointer transition-all ${extras.breakfast ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
-                           onClick={() => setExtras(prev => ({...prev, breakfast: !prev.breakfast}))}>
+                        onClick={() => setExtras(prev => ({ ...prev, breakfast: !prev.breakfast }))}>
                         <div className="d-flex justify-content-between align-items-center">
                           <FaUtensils className={extras.breakfast ? 'text-primary' : 'text-muted'} />
                           <div className={`form-check form-switch mb-0`}><input className="form-check-input" type="checkbox" checked={extras.breakfast} readOnly /></div>
@@ -315,7 +315,7 @@ const BookingPage = () => {
                     </div>
                     <div className="col-md-6">
                       <div className={`card border-2 rounded-4 p-3 cursor-pointer transition-all ${extras.airportPickup ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
-                           onClick={() => setExtras(prev => ({...prev, airportPickup: !prev.airportPickup}))}>
+                        onClick={() => setExtras(prev => ({ ...prev, airportPickup: !prev.airportPickup }))}>
                         <div className="d-flex justify-content-between align-items-center">
                           <FaPlaneDeparture className={extras.airportPickup ? 'text-primary' : 'text-muted'} />
                           <div className={`form-check form-switch mb-0`}><input className="form-check-input" type="checkbox" checked={extras.airportPickup} readOnly /></div>
@@ -338,7 +338,7 @@ const BookingPage = () => {
                       </div>
                     </div>
                     <div className="input-group">
-                      <input 
+                      <input
                         type="number" className={`form-control border-0 bg-white rounded-start-3 ${redemptionError ? 'is-invalid' : ''}`}
                         placeholder="Enter points (max 500)" value={redemptionPointsUsed || ''}
                         onChange={(e) => {
@@ -364,12 +364,12 @@ const BookingPage = () => {
                       { id: 'bank', name: 'Bank', icon: <FaUniversity /> }
                     ].map(method => (
                       <div key={method.id} className="col-4">
-                        <button 
+                        <button
                           className={`btn w-100 py-3 rounded-3 border-2 d-flex flex-column align-items-center gap-2 transition-all ${selectedPaymentMethod === method.id ? 'btn-primary border-primary shadow' : 'btn-outline-light text-dark border-light'}`}
                           onClick={() => {
                             setSelectedPaymentMethod(method.id);
                             setFormErrors({});
-                            
+
                             // Prefill phone number for UPI if available in user profile and field is empty
                             if (method.id === 'upi' && currentUser && !paymentFormData.phoneNumber) {
                               const userPhone = currentUser.contactNumber || currentUser.ContactNumber || currentUser.phone || '';
@@ -438,7 +438,7 @@ const BookingPage = () => {
                         </div>
                         <div className="col-12">
                           <div className="form-floating">
-                            <input type="text" className={`form-control bg-light border-0 ${formErrors.cardHolder ? 'is-invalid' : ''}`} placeholder="Name" value={paymentFormData.cardHolder} onChange={(e) => setPaymentFormData({...paymentFormData, cardHolder: e.target.value})} />
+                            <input type="text" className={`form-control bg-light border-0 ${formErrors.cardHolder ? 'is-invalid' : ''}`} placeholder="Name" value={paymentFormData.cardHolder} onChange={(e) => setPaymentFormData({ ...paymentFormData, cardHolder: e.target.value })} />
                             <label>Cardholder Name</label>
                             {formErrors.cardHolder && <div className="invalid-feedback d-block">{formErrors.cardHolder}</div>}
                           </div>
@@ -446,7 +446,7 @@ const BookingPage = () => {
                         <div className="col-8">
                           <label className="small fw-bold text-muted mb-2">Expiry Date</label>
                           <div className="d-flex gap-2">
-                            <select 
+                            <select
                               className={`form-select bg-light border-0 rounded-3 ${formErrors.expiryDate ? 'is-invalid' : ''}`}
                               value={paymentFormData.expiryDate.split('/')[0] || ''}
                               onChange={(e) => setPaymentFormData({ ...paymentFormData, expiryDate: `${e.target.value}/${paymentFormData.expiryDate.split('/')[1] || ''}` })}
@@ -456,7 +456,7 @@ const BookingPage = () => {
                                 <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</option>
                               ))}
                             </select>
-                            <select 
+                            <select
                               className={`form-select bg-light border-0 rounded-3 ${formErrors.expiryDate ? 'is-invalid' : ''}`}
                               value={paymentFormData.expiryDate.split('/')[1] || ''}
                               onChange={(e) => setPaymentFormData({ ...paymentFormData, expiryDate: `${paymentFormData.expiryDate.split('/')[0] || ''}/${e.target.value}` })}
@@ -472,7 +472,7 @@ const BookingPage = () => {
                         </div>
                         <div className="col-4">
                           <div className="form-floating mt-4">
-                            <input type="password" className={`form-control bg-light border-0 ${formErrors.cvv ? 'is-invalid' : ''}`} placeholder="CVV" value={paymentFormData.cvv} onChange={(e) => setPaymentFormData({...paymentFormData, cvv: e.target.value})} maxLength="4" />
+                            <input type="password" className={`form-control bg-light border-0 ${formErrors.cvv ? 'is-invalid' : ''}`} placeholder="CVV" value={paymentFormData.cvv} onChange={(e) => setPaymentFormData({ ...paymentFormData, cvv: e.target.value })} maxLength="4" />
                             <label>CVV</label>
                             {formErrors.cvv && <div className="invalid-feedback d-block">{formErrors.cvv}</div>}
                           </div>
@@ -484,7 +484,7 @@ const BookingPage = () => {
                   {selectedPaymentMethod === 'upi' && (
                     <div className="animate__animated animate__fadeIn">
                       <div className="form-floating mb-3">
-                        <input type="tel" className={`form-control bg-light border-0 ${formErrors.phoneNumber ? 'is-invalid' : ''}`} placeholder="Phone" value={paymentFormData.phoneNumber} onChange={(e) => setPaymentFormData({...paymentFormData, phoneNumber: e.target.value})} />
+                        <input type="tel" className={`form-control bg-light border-0 ${formErrors.phoneNumber ? 'is-invalid' : ''}`} placeholder="Phone" value={paymentFormData.phoneNumber} onChange={(e) => setPaymentFormData({ ...paymentFormData, phoneNumber: e.target.value })} />
                         <label>UPI Linked Phone Number</label>
                         {formErrors.phoneNumber && <div className="invalid-feedback d-block">{formErrors.phoneNumber}</div>}
                       </div>
@@ -492,7 +492,7 @@ const BookingPage = () => {
                     </div>
                   )}
 
-                  <button 
+                  <button
                     className="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill mt-4 shadow-sm"
                     onClick={handlePaymentConfirm}
                     disabled={!selectedPaymentMethod}
@@ -530,12 +530,12 @@ const BookingPage = () => {
                   <span>Tax (12%):</span>
                   <span>₹{priceCalculation.tax.toLocaleString()}</span>
                 </div>
-                  {priceCalculation.extrasTotal > 0 && (
-                    <div className="d-flex justify-content-between mb-3 text-info">
-                      <span>Add-ons & Extras:</span>
-                      <span>+₹{priceCalculation.extrasTotal.toLocaleString()}</span>
-                    </div>
-                  )}
+                {priceCalculation.extrasTotal > 0 && (
+                  <div className="d-flex justify-content-between mb-3 text-info">
+                    <span>Add-ons & Extras:</span>
+                    <span>+₹{priceCalculation.extrasTotal.toLocaleString()}</span>
+                  </div>
+                )}
                 {redemptionPointsUsed > 0 && (
                   <div className="d-flex justify-content-between mb-3 text-success">
                     <span>Redemption Discount:</span>

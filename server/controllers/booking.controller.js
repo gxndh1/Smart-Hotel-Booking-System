@@ -10,7 +10,7 @@ import User from '../models/user.model.js';
 // @access  Private (guest)
 export const createBooking = async (req, res) => {
   try {
-    const { roomId, checkInDate, checkOutDate, numberOfRooms, redemptionPointsUsed, extras, extrasAmount } = req.body;
+    const { roomId, checkInDate, checkOutDate, numberOfRooms, redemptionPointsUsed, extras, extrasAmount, additionalGuests } = req.body;
     const numRooms = numberOfRooms || 1;
 
     if (req.user.role !== 'guest') {
@@ -114,7 +114,8 @@ export const createBooking = async (req, res) => {
       redemptionPointsUsed: redemptionPointsUsed || 0,
       redemptionDiscountAmount: redemptionDiscountAmount,
       extras: extras || [],
-      extrasAmount: extrasAmount || 0
+      extrasAmount: extrasAmount || 0,
+      additionalGuests: additionalGuests || []
     });
 
     // Note: Loyalty points and room availability are handled in the payment controller
@@ -582,6 +583,7 @@ export const getBookingDetails = async (req, res) => {
       } : null,
       extras: booking.extras || [],
       extrasAmount: booking.extrasAmount || 0,
+      additionalGuests: booking.additionalGuests || [],
       totalPrice
     };
 

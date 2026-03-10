@@ -7,7 +7,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
     // Get today's date at midnight for proper comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Determine maximum rooms allowed based on inventory and system limit (10)
     const maxAvailable = Math.min(10, room?.totalRooms || room?.TotalRooms || 1);
 
@@ -34,7 +34,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
             const nameParts = fullName ? fullName.split(' ') : ['', ''];
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
-            
+
             setGuestDetails(prev => ({
                 firstName: prev.firstName || firstName || '',
                 lastName: prev.lastName || lastName || '',
@@ -62,7 +62,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
 
     const validateForm = () => {
         const newErrors = {};
-        
+
         // Validate guest details
         if (!guestDetails.firstName.trim()) newErrors.firstName = 'First name is required';
         if (!guestDetails.lastName.trim()) newErrors.lastName = 'Last name is required';
@@ -70,7 +70,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestDetails.email)) newErrors.email = 'Invalid email format';
         if (!guestDetails.phone.trim()) newErrors.phone = 'Phone is required';
         if (!/^\d{10,}$/.test(guestDetails.phone.replace(/[-\s]/g, ''))) newErrors.phone = 'Phone must be at least 10 digits';
-        
+
         // Validate room inventory
         if (numberOfRooms > maxAvailable) {
             newErrors.numberOfRooms = `Only ${maxAvailable} rooms are available for this type.`;
@@ -80,17 +80,17 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
         if (startDate >= endDate) {
             newErrors.dates = 'Check-out date must be after check-in date';
         }
-        
+
         // Compare dates properly - check if check-in date is before today
         const checkInDate = new Date(startDate);
         checkInDate.setHours(0, 0, 0, 0);
         const todayDate = new Date();
         todayDate.setHours(0, 0, 0, 0);
-        
+
         if (checkInDate < todayDate) {
             newErrors.startDate = 'Check-in date cannot be in the past';
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -101,7 +101,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
     // Use refs to avoid circular dependency - only depend on primitive values
     useEffect(() => {
         if (timerRef.current) clearTimeout(timerRef.current);
-        
+
         timerRef.current = setTimeout(() => {
             onSubmit({
                 ...guestDetails,
@@ -111,10 +111,11 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
                 checkOutTime,
                 nights: nights,
                 numberOfRooms: numberOfRooms,
+                additionalGuests: additionalGuests.map(g => g.name).filter(n => n.trim() !== ''),
                 isDraft: true // Key: Tells parent NOT to show the modal
             });
         }, 500);
-        
+
         return () => {
             if (timerRef.current) clearTimeout(timerRef.current);
         };
@@ -123,11 +124,11 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
     // FINAL SUBMIT: Triggered ONLY by the button click
     const handleFinalSubmit = (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
-        
+
         onSubmit({
             ...guestDetails,
             checkIn: startDate,
@@ -136,6 +137,7 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
             checkOutTime,
             nights: nights,
             numberOfRooms: numberOfRooms,
+            additionalGuests: additionalGuests.map(g => g.name).filter(n => n.trim() !== ''),
             isDraft: false // Key: Tells parent TO show the modal
         });
     };
@@ -161,36 +163,36 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
                 <div className="row g-3">
                     <div className="col-md-6">
                         <div className="form-floating">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 className={`form-control border-0 bg-light rounded-3 ${errors.firstName ? 'is-invalid' : ''}`}
                                 id="firstName" placeholder="First Name"
                                 value={guestDetails.firstName}
-                                onChange={(e) => setGuestDetails({ ...guestDetails, firstName: e.target.value })} 
+                                onChange={(e) => setGuestDetails({ ...guestDetails, firstName: e.target.value })}
                             />
                             <label htmlFor="firstName">First Name</label>
                         </div>
                     </div>
                     <div className="col-md-6">
                         <div className="form-floating">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 className={`form-control border-0 bg-light rounded-3 ${errors.lastName ? 'is-invalid' : ''}`}
                                 id="lastName" placeholder="Last Name"
                                 value={guestDetails.lastName}
-                                onChange={(e) => setGuestDetails({ ...guestDetails, lastName: e.target.value })} 
+                                onChange={(e) => setGuestDetails({ ...guestDetails, lastName: e.target.value })}
                             />
                             <label htmlFor="lastName">Last Name</label>
                         </div>
                     </div>
                     <div className="col-md-12">
                         <div className="form-floating">
-                            <input 
-                                type="email" 
+                            <input
+                                type="email"
                                 className={`form-control border-0 bg-light rounded-3 ${errors.email ? 'is-invalid' : ''}`}
                                 id="email" placeholder="Email"
                                 value={guestDetails.email}
-                                onChange={(e) => setGuestDetails({ ...guestDetails, email: e.target.value })} 
+                                onChange={(e) => setGuestDetails({ ...guestDetails, email: e.target.value })}
                             />
                             <label htmlFor="email">Email Address</label>
                         </div>
@@ -209,8 +211,8 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
                 {additionalGuests.map((guest, index) => (
                     <div key={index} className="d-flex gap-2 mb-2 animate__animated animate__fadeIn">
                         <div className="form-floating flex-grow-1">
-                            <input 
-                                type="text" className="form-control border-0 bg-light rounded-3" 
+                            <input
+                                type="text" className="form-control border-0 bg-light rounded-3"
                                 placeholder="Guest Name"
                                 value={guest.name}
                                 onChange={(e) => {
@@ -231,22 +233,22 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
             <div className="row g-3 mb-4">
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Check-in Date *</label>
-                    <DatePicker 
-                        selected={startDate} 
+                    <DatePicker
+                        selected={startDate}
                         className={`form-control w-100 rounded-3 ${errors.startDate || errors.dates ? 'is-invalid' : ''}`}
                         minDate={new Date()}
-                        onChange={(date) => { 
-                            setStartDate(date); 
+                        onChange={(date) => {
+                            setStartDate(date);
                             if (date >= endDate) setEndDate(new Date(date.getTime() + 86400000));
                             if (errors.startDate || errors.dates) setErrors({ ...errors, startDate: '', dates: '' });
-                        }} 
+                        }}
                     />
                     {(errors.startDate || errors.dates) && <div className="invalid-feedback d-block">{errors.startDate || errors.dates}</div>}
                 </div>
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Check-in Time *</label>
-                    <input 
-                        type="time" 
+                    <input
+                        type="time"
                         className="form-control rounded-3"
                         value={checkInTime}
                         onChange={(e) => setCheckInTime(e.target.value)}
@@ -254,21 +256,21 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
                 </div>
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Check-out Date *</label>
-                    <DatePicker 
-                        selected={endDate} 
+                    <DatePicker
+                        selected={endDate}
                         className={`form-control w-100 rounded-3 ${errors.dates ? 'is-invalid' : ''}`}
                         minDate={new Date(startDate.getTime() + 86400000)}
                         onChange={(date) => {
                             setEndDate(date);
                             if (errors.dates) setErrors({ ...errors, dates: '' });
-                        }} 
+                        }}
                     />
                     {errors.dates && <div className="invalid-feedback d-block">{errors.dates}</div>}
                 </div>
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Check-out Time *</label>
-                    <input 
-                        type="time" 
+                    <input
+                        type="time"
                         className="form-control rounded-3"
                         value={checkOutTime}
                         onChange={(e) => setCheckOutTime(e.target.value)}
@@ -280,16 +282,16 @@ const BookingForm = ({ hotel, room, user, initialEmail, onSubmit }) => {
                 <div className="col-md-12">
                     <label className="form-label small fw-bold text-muted">Number of Rooms *</label>
                     <div className="d-flex align-items-center">
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className="btn btn-outline-secondary rounded-3"
                             onClick={() => setNumberOfRooms(Math.max(1, numberOfRooms - 1))}
                         >
                             <i className="bi bi-dash"></i>
                         </button>
                         <span className="mx-3 fw-bold fs-5">{numberOfRooms}</span>
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             className="btn btn-outline-secondary rounded-3"
                             onClick={() => setNumberOfRooms(Math.min(maxAvailable, numberOfRooms + 1))}
                         >

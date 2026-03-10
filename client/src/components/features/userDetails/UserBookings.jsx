@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../../redux/authSlice";
-import { 
-  FaCalendarAlt, FaHotel, FaDoorOpen, FaClock, FaCheckCircle, FaTimesCircle, 
-  FaHourglassHalf, FaMoneyBillWave, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt, 
+import {
+  FaCalendarAlt, FaHotel, FaDoorOpen, FaClock, FaCheckCircle, FaTimesCircle,
+  FaHourglassHalf, FaMoneyBillWave, FaUser, FaPhone, FaEnvelope, FaMapMarkerAlt,
   FaStar, FaSpinner, FaInfoCircle, FaExclamationTriangle, FaChevronRight, FaHistory
 } from "react-icons/fa";
 
@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5600';
 const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingCancelled }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [bookings, setBookings] = useState(propBookings || []);
   const [loading, setLoading] = useState(propLoading || false);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -124,7 +124,7 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
 
   const handleConfirmCancel = async () => {
     if (!selectedBooking) return;
-    
+
     setCancelLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/bookings/${selectedBooking._id}/cancel`, {
@@ -147,22 +147,22 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
 
       if (data.success) {
         // Update bookings list
-        const updatedBookings = bookings.map(b => 
-          b._id === selectedBooking._id 
+        const updatedBookings = bookings.map(b =>
+          b._id === selectedBooking._id
             ? { ...b, status: 'cancelled' }
             : b
         );
         setBookings(updatedBookings);
-        
+
         // Close modal
         setShowCancelModal(false);
         setSelectedBooking(null);
-        
+
         // If there's a callback, call it
         if (onBookingCancelled) {
           onBookingCancelled(selectedBooking._id);
         }
-        
+
         alert('Booking cancelled successfully!');
         if (showDetailsModal) setShowDetailsModal(false);
       } else {
@@ -180,7 +180,7 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
     return bookings.filter(booking => {
       const checkIn = new Date(booking.checkInDate);
       const status = booking.status?.toLowerCase();
-      
+
       if (activeFilter === 'upcoming') return checkIn >= now && status !== 'cancelled';
       if (activeFilter === 'past') return checkIn < now && status !== 'cancelled';
       if (activeFilter === 'cancelled') return status === 'cancelled';
@@ -257,8 +257,8 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
                   <div className="row g-0">
                     <div className="col-md-3">
                       <div className="position-relative h-100" style={{ minHeight: '180px' }}>
-                        <img 
-                          src={booking.roomId?.hotelId?.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400"} 
+                        <img
+                          src={booking.roomId?.hotelId?.image || "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400"}
                           className="w-100 h-100 object-fit-cover"
                           alt="Hotel"
                         />
@@ -484,6 +484,18 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
                             <span>Email: <strong>{bookingDetails.user?.email || 'N/A'}</strong></span>
                           </div>
                         </div>
+                        {bookingDetails.additionalGuests && bookingDetails.additionalGuests.length > 0 && (
+                          <div className="col-12 mt-3 p-3 bg-light rounded-3">
+                            <span className="text-muted small fw-bold d-block mb-2">Additional Guests</span>
+                            <div className="d-flex flex-wrap gap-2">
+                              {bookingDetails.additionalGuests.map((guest, idx) => (
+                                <span key={idx} className="badge bg-white text-dark shadow-sm border px-3 py-2 d-flex align-items-center gap-2">
+                                  <FaUser className="text-primary xsmall" /> {guest}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -544,8 +556,8 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
                   Close
                 </button>
                 {bookingDetails?.canCancel && bookingDetails.status?.toLowerCase() !== 'cancelled' && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn btn-danger"
                     onClick={() => {
                       setShowDetailsModal(false);
@@ -587,16 +599,16 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowCancelModal(false)}
                   disabled={cancelLoading}
                 >
                   No, Keep Booking
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger"
                   onClick={handleConfirmCancel}
                   disabled={cancelLoading}
