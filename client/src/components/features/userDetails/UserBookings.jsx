@@ -178,11 +178,15 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
   const filteredBookings = useMemo(() => {
     const now = new Date();
     return bookings.filter(booking => {
-      const checkIn = new Date(booking.checkInDate);
+      // Compare against checkOutDate so it shows in Upcoming during the stay
+      const checkOut = new Date(booking.checkOutDate || booking.checkInDate);
+      // Include the entire checkout day
+      checkOut.setHours(23, 59, 59, 999);
+
       const status = booking.status?.toLowerCase();
 
-      if (activeFilter === 'upcoming') return checkIn >= now && status !== 'cancelled';
-      if (activeFilter === 'past') return checkIn < now && status !== 'cancelled';
+      if (activeFilter === 'upcoming') return checkOut >= now && status !== 'cancelled';
+      if (activeFilter === 'past') return checkOut < now && status !== 'cancelled';
       if (activeFilter === 'cancelled') return status === 'cancelled';
       return true;
     }).sort((a, b) => {
@@ -192,10 +196,18 @@ const UserBookings = ({ bookings: propBookings, loading: propLoading, onBookingC
     });
   }, [bookings, activeFilter]);
 
-  const stats = useMemo(() => ({
-    total: bookings.length,
-    upcoming: bookings.filter(b => new Date(b.checkInDate) >= new Date() && b.status !== 'cancelled').length
-  }), [bookings]);
+  const stats = useMemo(() => {
+    const now = new Date();
+    return {
+      total: bookings.length,
+      upcoming: bookings.filter(b => {
+        if (b.status === 'cancelled') return false;
+        const checkOut = new Date(b.checkOutDate || b.checkInDate);
+        checkOut.setHours(23, 59, 59, 999);
+        return checkOut >= now;
+      }).length
+    };
+  }, [bookings]);
 
   return (
     <>
