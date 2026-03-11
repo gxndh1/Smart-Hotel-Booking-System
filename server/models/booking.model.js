@@ -43,7 +43,6 @@ const BookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Payment',
     },
-    // Redemption points fields
     redemptionPointsUsed: {
       type: Number,
       default: 0,
@@ -59,12 +58,10 @@ const BookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Redemption',
     },
-    // Additional guests
     additionalGuests: {
       type: [String],
       default: [],
     },
-    // Extras fields
     extras: {
       type: [String],
       default: [],
