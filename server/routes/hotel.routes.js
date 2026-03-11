@@ -1,13 +1,6 @@
 import express from 'express';
-import {
-  createHotel,
-  getHotels,
-  getHotel,
-  updateHotel,
-  deleteHotel,
-} from '../controllers/hotel.controller.js';
+import {createHotel,getHotels,getHotel,updateHotel,deleteHotel,} from '../controllers/hotel.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
-
 const router = express.Router();
 
 router

@@ -1,15 +1,6 @@
 import express from 'express';
-import {
-  createBooking,
-  getBookings,
-  getBooking,
-  updateBooking,
-  cancelBooking,
-  getBookingDetails,
-  updateBookingStatus,
-} from '../controllers/booking.controller.js';
+import {createBooking,getBookings,getBooking,updateBooking,cancelBooking,getBookingDetails,updateBookingStatus,} from '../controllers/booking.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
-
 const router = express.Router();
 
 router.route('/')
