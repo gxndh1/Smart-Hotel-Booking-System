@@ -274,7 +274,11 @@ const ReviewSection = ({ hotelId, hotelName }) => {
                             <div className="flex-grow-1">
                               <small className="fw-bold d-block text-primary">Manager's Reply</small>
                               <p className="mb-0 small text-dark">{review.managerReply}</p>
-                              <small className="text-muted">{new Date(review.repliedAt).toLocaleDateString()}</small>
+                              <small className="text-muted">{
+                                review.repliedAt || review.managerReplyDate 
+                                  ? new Date(review.repliedAt || review.managerReplyDate).toLocaleDateString()
+                                  : 'Recently'
+                              }</small>
                             </div>
                           </div>
                         </div>
