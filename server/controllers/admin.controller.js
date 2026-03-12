@@ -428,7 +428,17 @@ export const getMostBookedHotels = async (req, res) => {
             $sum: {
               $cond: [
                 { $in: ['$status', ['confirmed', 'completed']] },
-                { $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] },
+                {
+                  $subtract: [
+                    {
+                      $add: [
+                        { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
+                        { $ifNull: ['$extrasAmount', 0] }
+                      ]
+                    },
+                    { $ifNull: ['$redemptionDiscountAmount', 0] }
+                  ]
+                },
                 0
               ]
             }
@@ -524,7 +534,19 @@ export const getDashboardStats = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: { $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] } }
+          totalRevenue: {
+            $sum: {
+              $subtract: [
+                {
+                  $add: [
+                    { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
+                    { $ifNull: ['$extrasAmount', 0] }
+                  ]
+                },
+                { $ifNull: ['$redemptionDiscountAmount', 0] }
+              ]
+            }
+          }
         }
       }
     ]);
