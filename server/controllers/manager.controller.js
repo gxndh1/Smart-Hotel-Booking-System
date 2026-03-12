@@ -81,21 +81,24 @@ export const getManagerDashboardStats = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          calculatedRevenue: {
+            $subtract: [
+              {
+                $add: [
+                  { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
+                  { $ifNull: ['$extrasAmount', 0] }
+                ]
+              },
+              { $ifNull: ['$redemptionDiscountAmount', 0] }
+            ]
+          }
+        }
+      },
+      {
         $group: {
           _id: null,
-          totalRevenue: {
-            $sum: {
-              $subtract: [
-                {
-                  $add: [
-                    { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
-                    { $ifNull: ['$extrasAmount', 0] }
-                  ]
-                },
-                { $ifNull: ['$redemptionDiscountAmount', 0] }
-              ]
-            }
-          }
+          totalRevenue: { $sum: '$calculatedRevenue' }
         }
       }
     ]);

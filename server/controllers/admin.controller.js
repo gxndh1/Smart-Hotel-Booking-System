@@ -405,6 +405,27 @@ export const getMostBookedHotels = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          calculatedRevenue: {
+            $cond: [
+              { $in: ['$status', ['confirmed', 'completed']] },
+              {
+                $subtract: [
+                  {
+                    $add: [
+                      { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
+                      { $ifNull: ['$extrasAmount', 0] }
+                    ]
+                  },
+                  { $ifNull: ['$redemptionDiscountAmount', 0] }
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      {
         $group: {
           _id: '$hotel._id',
           hotelName: { $first: '$hotel.name' },
@@ -424,25 +445,7 @@ export const getMostBookedHotels = async (req, res) => {
           cancelledBookings: {
             $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
           },
-          totalRevenue: {
-            $sum: {
-              $cond: [
-                { $in: ['$status', ['confirmed', 'completed']] },
-                {
-                  $subtract: [
-                    {
-                      $add: [
-                        { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
-                        { $ifNull: ['$extrasAmount', 0] }
-                      ]
-                    },
-                    { $ifNull: ['$redemptionDiscountAmount', 0] }
-                  ]
-                },
-                0
-              ]
-            }
-          }
+          totalRevenue: { $sum: '$calculatedRevenue' }
         }
       },
       { $sort: { totalBookings: -1 } },
@@ -532,21 +535,24 @@ export const getDashboardStats = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          calculatedRevenue: {
+            $subtract: [
+              {
+                $add: [
+                  { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
+                  { $ifNull: ['$extrasAmount', 0] }
+                ]
+              },
+              { $ifNull: ['$redemptionDiscountAmount', 0] }
+            ]
+          }
+        }
+      },
+      {
         $group: {
           _id: null,
-          totalRevenue: {
-            $sum: {
-              $subtract: [
-                {
-                  $add: [
-                    { $multiply: [{ $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] }, 1.12 ] },
-                    { $ifNull: ['$extrasAmount', 0] }
-                  ]
-                },
-                { $ifNull: ['$redemptionDiscountAmount', 0] }
-              ]
-            }
-          }
+          totalRevenue: { $sum: '$calculatedRevenue' }
         }
       }
     ]);
