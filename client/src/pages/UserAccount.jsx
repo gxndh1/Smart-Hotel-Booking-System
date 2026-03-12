@@ -132,7 +132,7 @@ const UserAccount = () => {
       case "manager":
         return ["profile", "manage-bookings"];
       case "admin":
-        return ["profile", "users", "hotels"];
+        return ["profile"];
       case "guest":
       default:
         return ["profile", "bookings", "loyalty"];
