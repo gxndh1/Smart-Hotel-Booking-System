@@ -110,6 +110,7 @@ const HotelDetails = () => {
             src={hotel.image}
             alt={hotel.name}
             className="w-100 h-100 object-fit-cover"
+            onError={(e) => { e.target.onError = null; e.target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200"; }}
           />
           <div className="position-absolute top-0 start-0 w-100 h-100" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%)" }}></div>
 

@@ -338,6 +338,7 @@ const AddHotel = () => {
                                                     alt="Preview" 
                                                     className="img-thumbnail rounded-3"
                                                     style={{ maxWidth: '300px', maxHeight: '200px' }}
+                                                    onError={(e) => { e.target.onError = null; e.target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600"; }}
                                                 />
                                             </div>
                                         )}

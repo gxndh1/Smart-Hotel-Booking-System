@@ -47,6 +47,7 @@ const HotelCard = ({ hotel }) => {
               className={styles.hotelImg} 
               alt={hotel.name} 
               loading="eager"
+              onError={(e) => { e.target.onError = null; e.target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"; }}
             />
             {hotel.availableRoomsCount === 0 && (
               <span className="badge bg-danger position-absolute top-0 start-0 m-3 rounded-pill shadow-sm">Sold Out</span>

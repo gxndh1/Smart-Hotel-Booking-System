@@ -106,6 +106,7 @@ function HotelPreview() {
                     className="card-img-top transition-all"
                     alt={hotel.name}
                     style={{ height: "220px", objectFit: "cover", transition: "transform 0.6s ease" }}
+                    onError={(e) => { e.target.onError = null; e.target.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"; }}
                   />
                   <div className="position-absolute top-0 start-0 m-2 d-flex flex-column gap-2">
                     <span className="badge bg-dark text-white small fw-bold px-3 py-2 rounded-pill shadow-sm">Featured</span>
