@@ -109,14 +109,14 @@ const NavBar = ({ isHomePage = false }) => {
                   </a>
                 </li>
               )}
-              {/* Call Us Button */}
+              {/* Contact Us Button */}
               <li>
                 <a
                   href="#"
                   className="text-decoration-none text-dark fw-bold rounded-2 px-3 py-2 d-flex align-items-center gap-2"
                   style={{ backgroundColor: "#fff" }}
                 >
-                  <FaPhoneAlt /> <span>Call Us</span>
+                  <FaPhoneAlt /> <span>Contact Us</span>
                 </a>
               </li>
               {/* Menu Dropdown - Authenticated Users */}
