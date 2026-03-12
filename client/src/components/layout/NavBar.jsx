@@ -112,7 +112,9 @@ const NavBar = ({ isHomePage = false }) => {
               {/* Contact Us Button */}
               <li>
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/in/gxndh1/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-decoration-none text-dark fw-bold rounded-2 px-3 py-2 d-flex align-items-center gap-2"
                   style={{ backgroundColor: "#fff" }}
                 >
