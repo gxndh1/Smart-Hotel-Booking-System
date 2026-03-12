@@ -99,7 +99,7 @@ const Hero = () => {
             textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)"
           }}
         >
-          Get 50% off on 1st booking
+          Hassle-free Booking
         </h1>
         <p className="lead text-light mb-5 animate__animated animate__fadeInUp" style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}>
           We compare hotel prices from over 100 sites
