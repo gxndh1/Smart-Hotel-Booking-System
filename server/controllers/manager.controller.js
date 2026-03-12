@@ -152,70 +152,101 @@ export const getManagerHotels = async (req, res) => {
     const userId = req.user.id;
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    const hotels = await Hotel.find({ managerId: userObjectId })
-      .sort({ createdAt: -1 });
-
-    // Get room count and booking count for each hotel
-    const hotelsWithStats = await Promise.all(
-      hotels.map(async (hotel) => {
-        const roomCount = await Room.countDocuments({ hotelId: hotel._id });
-        const rooms = await Room.find({ hotelId: hotel._id }).select('_id');
-        const roomIds = rooms.map(r => r._id);
-        const bookingCount = await Booking.countDocuments({ roomId: { $in: roomIds } });
-        const successfulBookingCount = await Booking.countDocuments({ 
-          roomId: { $in: roomIds }, 
-          status: { $in: ['confirmed', 'completed'] } 
-        });
-        
-        // Calculate revenue for this hotel
-        const revenueData = await Booking.aggregate([
-          { $match: { roomId: { $in: roomIds }, status: { $in: ['confirmed', 'completed'] } } },
-          {
-            $lookup: {
-              from: 'rooms',
-              localField: 'roomId',
-              foreignField: '_id',
-              as: 'room'
-            }
-          },
-          { $unwind: '$room' },
-          {
-            $addFields: {
-              nights: {
-                $ceil: {
-                  $divide: [
-                    { $subtract: [{ $toDate: "$checkOutDate" }, { $toDate: "$checkInDate" }] },
-                    1000 * 60 * 60 * 24
-                  ]
-                }
+    const hotelsWithStats = await Hotel.aggregate([
+      { $match: { managerId: userObjectId } },
+      {
+        $lookup: {
+          from: 'rooms',
+          localField: '_id',
+          foreignField: 'hotelId',
+          as: 'rooms'
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'rooms._id',
+          foreignField: 'roomId',
+          as: 'hotelBookings'
+        }
+      },
+      {
+        $addFields: {
+          roomCount: { $size: '$rooms' },
+          bookingCount: { $size: '$hotelBookings' },
+          successfulBookingCount: {
+            $size: {
+              $filter: {
+                input: '$hotelBookings',
+                as: 'booking',
+                cond: { $in: ['$$booking.status', ['confirmed', 'completed']] }
               }
             }
           },
-          {
-            $group: {
-              _id: null,
-              totalRevenue: { $sum: { $multiply: ['$room.price', '$numberOfRooms', { $max: [1, '$nights'] }] } }
+          totalRevenue: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: '$hotelBookings',
+                    as: 'booking',
+                    cond: { $in: ['$$booking.status', ['confirmed', 'completed']] }
+                  }
+                },
+                as: 'booking',
+                in: {
+                  $let: {
+                    vars: {
+                      // Find the matching room price natively inside the map
+                      roomPrice: {
+                        $let: {
+                          vars: {
+                            matchedRoom: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: '$rooms',
+                                    as: 'room',
+                                    cond: { $eq: ['$$room._id', '$$booking.roomId'] }
+                                  }
+                                },
+                                0
+                              ]
+                            }
+                          },
+                          in: { $ifNull: ['$$matchedRoom.price', 0] }
+                        }
+                      },
+                      nights: {
+                        $max: [
+                          1,
+                          {
+                            $ceil: {
+                              $divide: [
+                                { $subtract: [{ $toDate: "$$booking.checkOutDate" }, { $toDate: "$$booking.checkInDate" }] },
+                                1000 * 60 * 60 * 24
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    in: { $multiply: ['$$roomPrice', { $ifNull: ['$$booking.numberOfRooms', 1] }, '$$nights'] }
+                  }
+                }
+              }
             }
           }
-        ]);
-
-        return {
-          _id: hotel._id,
-          name: hotel.name,
-          location: hotel.location,
-          image: hotel.image,
-          rating: hotel.rating,
-          amenities: hotel.amenities,
-          description: hotel.description,
-          roomCount,
-          bookingCount,
-          successfulBookingCount,
-          totalRevenue: revenueData[0]?.totalRevenue || 0,
-          createdAt: hotel.createdAt,
-          updatedAt: hotel.updatedAt
-        };
-      })
-    );
+        }
+      },
+      {
+        $project: {
+          rooms: 0,
+          hotelBookings: 0
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -243,31 +274,49 @@ export const getManagerRooms = async (req, res) => {
       return res.status(200).json({ success: true, data: [] });
     }
 
-    // Get rooms for manager's hotels
-    const rooms = await Room.find({ hotelId: { $in: hotelIds } })
-      .populate('hotelId', 'name location')
-      .sort({ createdAt: -1 });
-
-    // Get booking count for each room
-    const roomsWithStats = await Promise.all(
-      rooms.map(async (room) => {
-        const bookingCount = await Booking.countDocuments({ roomId: room._id });
-        return {
-          _id: room._id,
-          type: room.type,
-          price: room.price,
-          totalRooms: room.totalRooms || 1,
-          capacity: room.capacity,
-          features: room.features,
-          availability: room.availability,
-          image: room.image,
-          hotelId: room.hotelId,
-          bookingCount,
-          createdAt: room.createdAt,
-          updatedAt: room.updatedAt
-        };
-      })
-    );
+    // Get rooms for manager's hotels with booking counts natively
+    const roomsWithStats = await Room.aggregate([
+      { $match: { hotelId: { $in: hotelIds } } },
+      {
+        $lookup: {
+          from: 'hotels',
+          localField: 'hotelId',
+          foreignField: '_id',
+          as: 'hotel'
+        }
+      },
+      {
+        $unwind: {
+          path: '$hotel',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'roomId',
+          as: 'bookings'
+        }
+      },
+      {
+        $addFields: {
+          bookingCount: { $size: '$bookings' },
+          hotelId: {
+            _id: '$hotel._id',
+            name: '$hotel.name',
+            location: '$hotel.location'
+          }
+        }
+      },
+      {
+        $project: {
+          bookings: 0,
+          hotel: 0
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ]);
 
     return res.status(200).json({
       success: true,

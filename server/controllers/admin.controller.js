@@ -9,19 +9,27 @@ import Review from '../models/review.model.js';
 // @access  Private (admin only)
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select('-password');
-
-    // Also include count of bookings per user
-    const usersWithStats = await Promise.all(
-      users.map(async (user) => {
-        const bookingCount = await Booking.countDocuments({ userId: user._id });
-        const userObj = user.toObject();
-        return {
-          ...userObj,
-          bookingCount
-        };
-      })
-    );
+    const usersWithStats = await User.aggregate([
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'bookings'
+        }
+      },
+      {
+        $addFields: {
+          bookingCount: { $size: '$bookings' }
+        }
+      },
+      {
+        $project: {
+          password: 0,
+          bookings: 0 // We don't need the actual bookings, just the count
+        }
+      }
+    ]);
 
     return res.status(200).json({
       success: true,
@@ -177,29 +185,67 @@ export const updateUserRole = async (req, res) => {
 // @access  Private (admin only)
 export const getAllHotels = async (req, res) => {
   try {
-    const hotels = await Hotel.find({})
-      .populate('managerId', 'name email contactNumber')
-      .sort({ createdAt: -1 });
-
-    const hotelsWithStats = await Promise.all(
-      hotels.map(async (hotel) => {
-        // Calculate true total room inventory (tallying the capacity or totalRooms field, defaulting to 1 per room listing)
-        const roomsForHotel = await Room.find({ hotelId: hotel._id });
-        const totalRoomsCount = roomsForHotel.reduce((acc, room) => acc + (room.totalRooms || room.TotalRooms || 1), 0);
-
-        const bookingCount = await Booking.countDocuments({
-          roomId: { $in: roomsForHotel.map(r => r._id) }
-        });
-
-        const hotelObj = hotel.toObject();
-        return {
-          ...hotelObj,
-          manager: hotelObj.managerId,
-          totalRoomsCount,
-          bookingCount
-        };
-      })
-    );
+    const hotelsWithStats = await Hotel.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'managerId',
+          foreignField: '_id',
+          as: 'manager'
+        }
+      },
+      {
+        $unwind: {
+          path: '$manager',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'rooms',
+          localField: '_id',
+          foreignField: 'hotelId',
+          as: 'rooms'
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'rooms._id',
+          foreignField: 'roomId',
+          as: 'bookings'
+        }
+      },
+      {
+        $addFields: {
+          totalRoomsCount: {
+            $sum: {
+              $map: {
+                input: '$rooms',
+                as: 'room',
+                in: { $ifNull: ['$$room.totalRooms', { $ifNull: ['$$room.TotalRooms', 1] }] }
+              }
+            }
+          },
+          bookingCount: { $size: '$bookings' },
+          manager: {
+            _id: '$manager._id',
+            name: '$manager.name',
+            email: '$manager.email',
+            contactNumber: '$manager.contactNumber'
+          }
+        }
+      },
+      {
+        $project: {
+          rooms: 0,
+          bookings: 0
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
 
     return res.status(200).json({
       success: true,
