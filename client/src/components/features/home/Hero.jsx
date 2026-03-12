@@ -169,6 +169,7 @@ const Hero = () => {
                 endDate={endDate}
                 onChange={(update) => setDateRange(update)}
                 isClearable={true}
+                minDate={new Date()}
                 placeholderText="Add dates"
                 className="form-control border-0 p-0 shadow-none bg-transparent"
                 dateFormat="dd/MM/yy"
