@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../redux/authSlice";
 
@@ -33,6 +33,8 @@ const Register = ({ onSwitchToLogin }) => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -116,10 +118,44 @@ const Register = ({ onSwitchToLogin }) => {
           <input name="email" type="email" placeholder="Email" autoComplete="email" style={styles.input} onChange={handleChange} />
 
           <label style={styles.label}>Password</label>
-          <input name="password" type="password" placeholder="Password" autoComplete="new-password" style={styles.input} onChange={handleChange} />
+          <div style={{ position: "relative" }}>
+            <input name="password" type={showPassword ? "text" : "password"} placeholder="Password" autoComplete="new-password" style={styles.input} onChange={handleChange} />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "12px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#666"
+              }}
+            >
+              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+            </button>
+          </div>
 
           <label style={styles.label}>Confirm Password</label>
-          <input name="confirmPassword" type="password" placeholder="Confirm Password" autoComplete="new-password" style={styles.input} onChange={handleChange} />
+          <div style={{ position: "relative" }}>
+            <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm Password" autoComplete="new-password" style={styles.input} onChange={handleChange} />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "12px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#666"
+              }}
+            >
+              {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+            </button>
+          </div>
 
           <button type="submit" style={styles.button}>Register</button>
         </form>

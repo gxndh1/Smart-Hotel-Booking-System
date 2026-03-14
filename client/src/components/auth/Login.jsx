@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../redux/authSlice";
 
@@ -85,6 +85,7 @@ const styles = {
 const Login = ({ onSuccess, onSwitchToRegister }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -151,15 +152,32 @@ const Login = ({ onSuccess, onSwitchToRegister }) => {
             required
           />
           <label style={styles.label}>Password</label>
-          <input
-            type="password"
-            placeholder="Password"
-            autoComplete="current-password"
-            style={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              autoComplete="current-password"
+              style={styles.input}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "12px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#666"
+              }}
+            >
+              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+            </button>
+          </div>
           <button type="submit" style={styles.button} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
