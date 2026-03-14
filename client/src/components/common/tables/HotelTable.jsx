@@ -12,7 +12,14 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
   const getLocation = (hotel) => hotel.location || hotel.Location || '';
   const getImage = (hotel) => hotel.image || hotel.Image || '';
   const getRating = (hotel) => hotel.rating || hotel.Rating || 0;
-  const getManager = (hotel) => hotel.managerId || hotel.manager || null;
+  
+  // FIX: Prioritize hotel.manager (the populated object) over hotel.managerId (the string ID)
+  // Also properly handle if managerId is populated instead
+  const getManager = (hotel) => {
+    if (hotel.manager && typeof hotel.manager === 'object') return hotel.manager;
+    if (hotel.managerId && typeof hotel.managerId === 'object') return hotel.managerId;
+    return null;
+  };
 
   const handleEdit = (hotel) => {
     navigate('/add-hotel', { state: { editHotel: hotel, isEditing: true } });
@@ -74,8 +81,8 @@ const HotelTable = ({ hotels = [], onDelete, isAdmin, isManager }) => {
                     <td>
                       {getManager(hotel) ? (
                         <div className="small">
-                          <div className="fw-bold"><FaUserTie className="me-1 text-primary" />{getManager(hotel).name || 'Manager'}</div>
-                          <div className="text-muted">{getManager(hotel).email}</div>
+                          <div className="fw-bold text-dark"><FaUserTie className="me-1 text-primary" />{getManager(hotel).name || getManager(hotel).Name || 'Manager'}</div>
+                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>{getManager(hotel).email || getManager(hotel).Email || 'No Email'}</div>
                         </div>
                       ) : <span className="badge bg-secondary">Unassigned</span>}
                     </td>

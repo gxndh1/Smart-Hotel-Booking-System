@@ -240,7 +240,7 @@
   line-height: 1.2;
 }
 
-.search-bar > div {
+.search-bar>div {
   padding: 0.1rem 0 !important;
 }
 
@@ -355,7 +355,7 @@
     gap: 0.5rem;
   }
 
-  .search-bar > div {
+  .search-bar>div {
     min-width: 120px;
   }
 
@@ -414,7 +414,7 @@
     padding: 1rem !important;
   }
 
-  .search-bar > div {
+  .search-bar>div {
     width: 100% !important;
     border: none !important;
     padding: 0.5rem 0 !important;
@@ -533,7 +533,7 @@
     border-radius: 1rem !important;
   }
 
-  .search-bar > div {
+  .search-bar>div {
     width: 100% !important;
     border: none !important;
     padding: 0.4rem 0 !important;
@@ -607,23 +607,34 @@
 
 /* Animation for Hotel Cards */
 .hotel-card-wrapper {
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-              box-shadow 0.3s ease;
-  border-radius: 8px; /* Matches HotelCard rounding */
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    box-shadow 0.3s ease;
+  border-radius: 8px;
+  /* Matches HotelCard rounding */
 }
 
 .hotel-card-wrapper:hover {
-  transform: translateY(-5px); /* Moves card up slightly */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12); /* Adds depth */
+  transform: translateY(-5px);
+  /* Moves card up slightly */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  /* Adds depth */
 }
 
 .hotel-card-wrapper:active {
-  transform: translateY(-2px); /* Slight 'click' feel */
+  transform: translateY(-2px);
+  /* Slight 'click' feel */
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in-section {
@@ -635,13 +646,23 @@
   border-bottom: 3px solid transparent;
 }
 
-.hotel-img-zoom { transition: transform 0.5s ease; }
-.room-card-hover:hover .hotel-img-zoom { transform: scale(1.1); }
+.hotel-img-zoom {
+  transition: transform 0.5s ease;
+}
+
+.room-card-hover:hover .hotel-img-zoom {
+  transform: scale(1.1);
+}
 
 /* Spin animation for loading spinners */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spin {

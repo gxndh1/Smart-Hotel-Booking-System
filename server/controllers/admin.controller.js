@@ -3,6 +3,7 @@ import Hotel from '../models/hotel.model.js';
 import Room from '../models/room.model.js';
 import Booking from '../models/booking.model.js';
 import Review from '../models/review.model.js';
+import LoyaltyAccount from '../models/loyalty.model.js';
 
 // @desc    Get all users (admin view - includes all roles)
 // @route   GET /api/admin/users
@@ -343,9 +344,56 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
 
+    const oldStatus = booking.status;
+    
     // Update booking status
     booking.status = status;
     await booking.save();
+
+    // Handle Loyalty Points if Admin Cancels a Confirmed Booking
+    if (status.toLowerCase() === 'cancelled' && oldStatus === 'confirmed' && 
+       (booking.userId?.role === 'guest' || booking.userId?.Role === 'guest')) {
+      const loyaltyAccount = await LoyaltyAccount.findOne({ userId: booking.userId._id });
+      if (loyaltyAccount) {
+        // 1. Deduct points earned for this booking
+        await booking.populate('paymentId');
+        const amount = booking.paymentId?.amount || 0;
+        const pointsEarned = Math.floor(amount * 0.1);
+        
+        if (pointsEarned > 0) {
+          loyaltyAccount.pointsBalance = Math.max(0, loyaltyAccount.pointsBalance - pointsEarned);
+          loyaltyAccount.history.push({
+            type: 'cancelled',
+            points: pointsEarned,
+            description: `Deducted points for admin-cancelled booking ${booking._id}`,
+            date: new Date()
+          });
+        }
+        
+        // 2. Refund redemption points used
+        if (booking.redemptionPointsUsed > 0) {
+          loyaltyAccount.redemptionPointsBalance += booking.redemptionPointsUsed;
+          loyaltyAccount.history.push({
+            type: 'refunded',
+            points: booking.redemptionPointsUsed,
+            description: `Refunded redemption points for admin-cancelled booking`,
+            date: new Date()
+          });
+        }
+        
+        loyaltyAccount.lastUpdated = new Date();
+        await loyaltyAccount.save();
+      }
+    }
+
+    // Sync room availability if status changed to cancelled
+    if (status.toLowerCase() === 'cancelled') {
+      const room = await Room.findById(booking.roomId?._id);
+      if (room && !room.availability) {
+        room.availability = true;
+        await room.save();
+      }
+    }
 
     // Populate for response
     await booking.populate('userId', 'name email');
@@ -609,6 +657,7 @@ export const getAllReviews = async (req, res) => {
       hotelName: review.hotelId?.name || 'Unknown',
       rating: review.rating,
       comment: review.comment,
+      managerReply: review.managerReply,
       isVerified: review.isVerified || false,
       createdAt: review.createdAt
     }));

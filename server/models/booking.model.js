@@ -97,11 +97,20 @@ BookingSchema.statics.updateRoomAvailability = async function (roomId) {
 
   if (!room) return;
 
-  // Use aggregation to sum the numberOfRooms for active bookings
+  // Find all rooms of this type in this hotel to calculate true aggregate inventory
+  const sameTypeRooms = await Room.find({ 
+    hotelId: room.hotelId, 
+    type: room.type 
+  });
+  
+  const roomIdsOfType = sameTypeRooms.map(r => r._id);
+  const systemMaxRooms = sameTypeRooms.reduce((sum, r) => sum + (r.totalRooms || r.TotalRooms || 1), 0);
+
+  // Group active bookings by room type
   const result = await this.aggregate([
     {
       $match: {
-        roomId: new mongoose.Types.ObjectId(roomId),
+        roomId: { $in: roomIdsOfType },
         status: { $in: ['pending', 'confirmed'] }
       }
     },
@@ -114,12 +123,14 @@ BookingSchema.statics.updateRoomAvailability = async function (roomId) {
   ]);
 
   const totalBooked = result.length > 0 ? result[0].totalBooked : 0;
-  const maxRooms = room.totalRooms || room.TotalRooms || 1;
 
-  // If total booked rooms reach or exceed totalRooms, mark as unavailable
-  const isAvailable = totalBooked < maxRooms;
+  // If total booked rooms reach or exceed totalRooms, mark all instances of this room type as unavailable
+  const isAvailable = totalBooked < systemMaxRooms;
 
-  await Room.findByIdAndUpdate(roomId, { availability: isAvailable });
+  await Room.updateMany(
+    { _id: { $in: roomIdsOfType } }, 
+    { $set: { availability: isAvailable } }
+  );
 };
 
 // Call updateRoomAvailability after a booking is saved (created or status updated)

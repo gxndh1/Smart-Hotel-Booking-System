@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaReply } from 'react-icons/fa';
 
 const AdminReviewSection = ({ reviews, onDelete }) => {
   if (reviews.length === 0) {
@@ -34,7 +34,12 @@ const AdminReviewSection = ({ reviews, onDelete }) => {
                 </span>
               </td>
               <td className="text-muted small" style={{ maxWidth: "300px" }}>
-                {review.comment?.substring(0, 80) || "No comment"}...
+                <div>{review.comment || "No comment"}</div>
+                {review.managerReply && (
+                  <div className="mt-2 text-success fst-italic border-start border-success border-2 ps-2">
+                    <FaReply className="me-1" /> {review.managerReply}
+                  </div>
+                )}
               </td>
               <td className="text-muted small">
                 {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "N/A"}

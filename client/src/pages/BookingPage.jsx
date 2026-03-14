@@ -83,8 +83,26 @@ const BookingPage = () => {
     const foundRoom = roomsByHotel.find((r) => String(r._id || r.id) === String(roomId));
 
     if (foundHotel && foundRoom) {
+      // Calculate total available rooms for this specific room type
+      const roomType = foundRoom.type || foundRoom.Type || "Standard Room";
+      let totalAvailableForType = 0;
+      
+      roomsByHotel.forEach(r => {
+        const rType = r.type || r.Type || "Standard Room";
+        const isAvail = String(r.availability ?? r.Availability).toLowerCase() === "true";
+        if (rType === roomType && isAvail) {
+           totalAvailableForType += (r.totalRooms || r.TotalRooms || 1);
+        }
+      });
+      
+      // Inject the calculated group availability into the room object for the BookingForm
+      const roomWithGroupInventory = {
+        ...foundRoom,
+        totalRooms: Math.max(foundRoom.totalRooms || 1, totalAvailableForType)
+      };
+
       setHotel(foundHotel);
-      setRoom(foundRoom);
+      setRoom(roomWithGroupInventory);
       setLoading(false);
     } else if (allHotels.length > 0 && roomsByHotel.length > 0 && currentStep < 3) {
       // Data is loaded but specific IDs not found - only redirect if still in selection phase.

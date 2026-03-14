@@ -1,4 +1,3 @@
-```javascript
 import React from 'react';
 import ManagerReviewTable from './ManagerReviewTable';
 
@@ -16,6 +15,4 @@ const ManagerReviewSection = ({ reviews, onReply }) => {
     </>
   );
 };
-
 export default ManagerReviewSection;
-```

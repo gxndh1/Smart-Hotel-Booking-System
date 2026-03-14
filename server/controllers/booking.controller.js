@@ -61,13 +61,21 @@ export const createBooking = async (req, res) => {
     const guestName = guest ? guest.name : '';
     const managerEmail = room.hotelId?.managerId?.email || '';
 
-    // Check inventory availability
+    // Find all rooms of the same type in this hotel to calculate true aggregate inventory
+    const sameTypeRooms = await Room.find({ 
+      hotelId: room.hotelId._id || room.hotelId, 
+      type: room.type 
+    });
+    
+    const roomIdsOfType = sameTypeRooms.map(r => r._id);
+    const systemMaxRooms = sameTypeRooms.reduce((sum, r) => sum + (r.totalRooms || r.TotalRooms || 1), 0);
+
     // Only count confirmed bookings or recent pending ones from OTHER users to prevent self-lockouts
     const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
     const result = await Booking.aggregate([
       {
         $match: {
-          roomId: new mongoose.Types.ObjectId(roomId),
+          roomId: { $in: roomIdsOfType },
           $or: [
             { status: { $in: ['confirmed', 'completed'] } },
             {
@@ -88,11 +96,10 @@ export const createBooking = async (req, res) => {
 
     const activeBookedRooms = result.length > 0 ? result[0].totalBooked : 0;
 
-    // Robust check for availability and total rooms (handles PascalCase/camelCase inconsistencies)
+    // Check availability across all identical rooms
     const isRoomAvailable = room.availability ?? room.Availability ?? true;
-    const maxRooms = room.totalRooms ?? room.TotalRooms ?? 1;
 
-    if (!isRoomAvailable || (activeBookedRooms + numRooms > maxRooms)) {
+    if (!isRoomAvailable || (activeBookedRooms + numRooms > systemMaxRooms)) {
       return res.status(400).json({
         success: false,
         message: 'Sorry, the selected room type is no longer available for your request.'

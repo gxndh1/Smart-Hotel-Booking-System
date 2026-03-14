@@ -247,32 +247,38 @@ const ManagerDashboard = () => {
 
 
           {/* DASHBOARD HEADER */}
-          <DashboardHeader 
-            title="Manager Dashboard"
-            subtitle="Manage your hotels and monitor bookings"
-            icon={FaChartBar}
-            onAccountClick={() => navigate('/account')}
-            onLogoutClick={handleLogout}
-          />
+          <div className="anim-fade-up">
+            <DashboardHeader 
+              title="Manager Dashboard"
+              subtitle="Manage your hotels and monitor bookings"
+              icon={FaChartBar}
+              onAccountClick={() => navigate('/account')}
+              onLogoutClick={handleLogout}
+            />
+          </div>
 
 
           {/* DASHBOARD TABS */}
-          <DashboardTabs 
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={(id) => { setActiveTab(id); setSearchTerm(""); }}
-          />
+          <div className="anim-fade-up anim-stagger-1">
+            <DashboardTabs 
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={(id) => { setActiveTab(id); setSearchTerm(""); }}
+            />
+          </div>
 
 
           {/* DASHBOARD SEARCH */}
-          <DashboardSearch 
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            placeholder={`Search ${activeTab}...`}
-          />
+          <div className="anim-fade-up anim-stagger-2">
+            <DashboardSearch 
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              placeholder={`Search ${activeTab}...`}
+            />
+          </div>
 
 
-          <div className="card shadow-sm border-0 rounded-4">
+          <div className="card shadow-sm border-0 rounded-4 anim-fade-up anim-stagger-3">
             <div className="card-body p-4">
               {loading && (
                 <div className="text-center py-5">

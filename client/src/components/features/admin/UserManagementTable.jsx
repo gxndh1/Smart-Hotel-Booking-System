@@ -37,9 +37,9 @@ const UserManagementTable = ({ users, type, onDelete, onRoleChange }) => {
             <th className="py-3">Name</th>
             <th className="py-3">Email</th>
             <th className="py-3">Role</th>
-            <th className="py-3">Bookings</th>
+            {type === 'customer' && <th className="py-3">Bookings</th>}
             <th className="py-3">Joined</th>
-            <th className="py-3 text-end px-4">Actions</th>
+            {type !== 'admin' && <th className="py-3 text-end px-4">Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -55,19 +55,20 @@ const UserManagementTable = ({ users, type, onDelete, onRoleChange }) => {
                 <td>
                   <RoleBadge role={user.role || type} />
                 </td>
-                <td>
-                  <span className="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill">
-                    {user.bookingCount || 0}
-                  </span>
-                </td>
+                {type === 'customer' && (
+                  <td>
+                    <span className="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill">
+                      {user.bookingCount || 0}
+                    </span>
+                  </td>
+                )}
                 <td className="text-muted small">
                   {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
                 </td>
-                <td className="px-4">
-                  <div className="d-flex gap-2 justify-content-end">
-                    {/* Role Change Dropdown Removed */}
-                    {/* Delete Button */}
-                    {type !== "admin" && (
+                {type !== 'admin' && (
+                  <td className="px-4">
+                    <div className="d-flex gap-2 justify-content-end">
+                      {/* Delete Button */}
                       <button
                         className="btn btn-sm btn-light border"
                         title="Delete User"
@@ -75,14 +76,17 @@ const UserManagementTable = ({ users, type, onDelete, onRoleChange }) => {
                       >
                         <FaTrash className="text-danger" />
                       </button>
-                    )}
-                  </div>
-                </td>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center py-5">
+              <td 
+                colSpan={type === 'customer' ? "7" : type === 'admin' ? "5" : "6"} 
+                className="text-center py-5"
+              >
                 <div className="text-muted">
                   <i className="bi bi-person-x display-4 d-block mb-2"></i>
                   No {type}s found in the database.
