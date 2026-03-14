@@ -19,16 +19,22 @@ const AddHotel = () => {
     const userRole = (auth.user?.role || auth.user?.Role || "").toLowerCase();
     const isAdmin = userRole === 'admin';
     
-    // Check if editing - support both query param and state
+
+
+    // CHECK IF EDITING
     const editHotelFromState = location.state?.editHotel;
     const editHotelIdFromQuery = searchParams.get('edit');
     const [fetchedHotel, setFetchedHotel] = useState(null);
     const [loadingHotel, setLoadingHotel] = useState(false);
     
-    // Check if editing from query parameter
+
+
+    // CHECK IF EDITING FROM QUERY PARAM
     const isEditingFromQuery = !!editHotelIdFromQuery;
     
-    // Fetch hotel data if editing from query param
+
+
+    // FETCH HOTEL DATA IF EDITING FROM QUERY PARAM
     useEffect(() => {
         if (editHotelIdFromQuery) {
             setLoadingHotel(true);
@@ -42,13 +48,19 @@ const AddHotel = () => {
         }
     }, [editHotelIdFromQuery]);
     
-    // Determine if we are editing
+
+
+    // CHECK IF EDITING
     const isEditing = location.state?.isEditing || isEditingFromQuery;
     
-    // Get the hotel to edit - prefer state, then fetched data
+
+
+    // GET THE HOTEL TO EDIT - PREFER STATE, THEN FETCHED DATA
     const editHotel = editHotelFromState || fetchedHotel;
     
-    // Form state - load data from editHotel if available
+
+
+    // LOAAD HOTEL DATA IN FORM
     const [formData, setFormData] = useState({
         name: editHotel?.Name || editHotel?.name || '',
         location: editHotel?.Location || editHotel?.location || '',
@@ -67,10 +79,15 @@ const AddHotel = () => {
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     
+
+
+    // AVAILABLE FEATURES AND AMENITIES
     const availableFeatures = ['Sea View', 'City View', 'Garden View', 'Mountain View', 'Travel Desk', 'Lake View', 'Heritage Building', 'Nightlife Access', 'Luxury Spa', 'Club Access'];
     const availableAmenities = ['Free WiFi', 'Pool', 'Breakfast included', 'Gym', 'Spa', 'Restaurant', 'Free cancellation', 'Concierge', 'Business Center', 'Fitness Center'];
     
-    // Check if user is authenticated and is a manager or admin
+
+
+    // MANAGER AND ADMIN IS ALLOWED
     useEffect(() => {
         if (userRole !== 'manager' && userRole !== 'admin') {
             navigate('/');
@@ -92,6 +109,9 @@ const AddHotel = () => {
         }
     };
     
+
+
+    // TOGGLE FEATURE
     const handleFeatureToggle = (feature) => {
         setSelectedFeatures(prev => 
             prev.includes(feature) 
@@ -100,6 +120,8 @@ const AddHotel = () => {
         );
     };
     
+
+    // TOGGLE AMENITY
     const handleAmenityToggle = (amenity) => {
         setSelectedAmenities(prev => 
             prev.includes(amenity) 
@@ -108,6 +130,8 @@ const AddHotel = () => {
         );
     };
     
+
+    // VALIDATE FORM
     const validateForm = () => {
         const newErrors = {};
         
@@ -134,6 +158,8 @@ const AddHotel = () => {
         return Object.keys(newErrors).length === 0;
     };
     
+
+    // HANDLE SUBMIT
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -162,7 +188,8 @@ const AddHotel = () => {
                 alert(`${formData.name} is created successfully!`);
             }
             
-            // Reset form
+
+            // RESET FORM
             setFormData({
                 name: '',
                 location: '',
@@ -178,7 +205,9 @@ const AddHotel = () => {
             setSelectedFeatures([]);
             setSelectedAmenities([]);
             
-            // Redirect based on user role
+
+
+            // REDIRECT BASED ON USER ROLE
             setTimeout(() => {
                 if (isAdmin) {
                     navigate('/admin', { state: { activeTab: 'hotels' } });
@@ -192,6 +221,8 @@ const AddHotel = () => {
         }
     };
     
+
+    // UI
     return (
         <div className="d-flex flex-column min-vh-100">
             <NavBar />
