@@ -1,6 +1,8 @@
 import React from 'react';
 import { FaBuilding, FaBed, FaCalendarCheck, FaWallet } from 'react-icons/fa';
 
+
+// CONVERTING VALUE IN LAKH
 const formatRevenue = (amount) => {
   if (amount >= 100000) {
     return `₹${(amount / 100000).toFixed(1)}L`;
@@ -8,6 +10,8 @@ const formatRevenue = (amount) => {
   return `₹${(amount || 0).toLocaleString()}`;
 };
 
+
+// MANAGER DASHBOARD STATS
 const ManagerStats = ({ stats }) => {
   const dashboardStats = [
     { label: "My Hotels", value: stats?.hotels?.total || 0, color: "primary", icon: <FaBuilding /> },
@@ -16,10 +20,12 @@ const ManagerStats = ({ stats }) => {
     { label: "Est. Revenue", value: formatRevenue(stats?.revenue?.total), color: "warning", icon: <FaWallet /> },
   ];
 
+
+  // UI
   return (
     <div className="row g-3">
-      {dashboardStats.map((stat, idx) => (
-        <div key={idx} className="col-md-6 col-lg-3">
+      {dashboardStats.map((stat, index) => (
+        <div key={index} className="col-md-6 col-lg-3">
           <div className={`card border-0 shadow-sm rounded-4 bg-${stat.color} text-white h-100`}>
             <div className="card-body p-4 text-center">
               <div className="mb-2">{stat.icon}</div>

@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { FaStar, FaReply, FaTrash, FaUser } from 'react-icons/fa';
 
+
+// REVIEW TABLE
 const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
 
+  // REPLY FN
   const handleReplySubmit = (reviewId) => {
     if (!replyText.trim()) return;
     onReply(reviewId, replyText);
@@ -12,10 +15,12 @@ const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
     setReplyText('');
   };
 
+  // NO REVIEWS
   if (reviews.length === 0) {
     return <div className="text-center py-5 text-muted">No reviews found for your hotels.</div>;
   }
 
+  // REVIEW TABLE
   return (
     <div className="table-responsive">
       <table className="table table-hover align-middle">

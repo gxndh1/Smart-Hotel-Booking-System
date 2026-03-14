@@ -3,6 +3,8 @@ import { useDispatch } from 'react-redux';
 import { updateManagerRoom } from '../../../redux/managerSlice';
 import { FaTrash, FaEdit, FaBed, FaMoneyBillWave, FaUsers, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
+
+// DEFINIG THE STATES OF THE ROOMS
 const RoomTable = ({ rooms = [], allHotels = [], managerHotels = [], onDelete }) => {
     const dispatch = useDispatch();
     const [editingRoomId, setEditingRoomId] = useState(null);
@@ -10,8 +12,10 @@ const RoomTable = ({ rooms = [], allHotels = [], managerHotels = [], onDelete })
     const [roomPrice, setRoomPrice] = useState('');
     const [isAvailable, setIsAvailable] = useState(true);
 
+    // GETTING THE HOTELS
     const hotels = managerHotels.length > 0 ? managerHotels : allHotels;
 
+    // GETTING THE HOTEL NAME
     const getHotelName = (hotel) => {
         if (!hotel) return 'N/A';
         if (typeof hotel === 'string') {
@@ -21,6 +25,8 @@ const RoomTable = ({ rooms = [], allHotels = [], managerHotels = [], onDelete })
         return hotel.name || hotel.Name || 'Unknown Hotel';
     };
 
+
+    // FILLING ROOM FORM
     const startEdit = (room) => {
         setEditingRoomId(room._id);
         setRoomType(room.type || room.Type || '');

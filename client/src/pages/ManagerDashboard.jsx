@@ -34,6 +34,8 @@ import ManagerRoomSection from "../components/features/manager/ManagerRoomSectio
 import ManagerBookingSection from "../components/features/manager/ManagerBookingSection";
 import ManagerReviewSection from "../components/features/manager/ManagerReviewSection";
 
+
+//STATES FOR ACTIVE TAB , SEARCH BAR , ADD ROOM MODAL 
 const ManagerDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +43,9 @@ const ManagerDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Redux selectors
+
+
+  //REDUX SELECTORS - GETTING DATA FROM THE REDUX STORE
   const stats = useSelector(selectManagerStats);
   const hotels = useSelector(selectManagerHotels);
   const rooms = useSelector(selectManagerRooms);
@@ -51,24 +55,38 @@ const ManagerDashboard = () => {
   const error = useSelector(selectManagerError);
   const auth = useSelector((state) => state.auth);
 
-  // Get user role
+
+
+  // FINDING THE ROLE OF USER
   const rawRole = auth?.user?.role || sessionStorage.getItem('userRole');
   const userRole = rawRole?.toLowerCase();
 
-  // Fetch data on mount
+
+
+  // LOADING THE DATA ON MOUNT
   useEffect(() => {
     if (userRole === 'manager' || userRole === 'admin') {
       loadData();
     }
   }, [dispatch, userRole]);
 
-  // Redirect if not a manager
+
+
+  // REDIRECTING TO HOME PAGE IF NOT A MANAGER
   useEffect(() => {
     if (userRole && userRole !== 'manager' && userRole !== 'admin') {
       navigate('/');
     }
   }, [userRole, navigate]);
 
+
+
+  // FUNCTION TO LOAD THE DATA ON DISPATCH OF WHILE GETTING THE ROLES
+  // HITS GET /api/manager/stats
+  // HITS GET /api/manager/hotels
+  // HITS GET /api/manager/rooms
+  // HITS GET /api/manager/bookings
+  // HITS GET /api/manager/reviews
   const loadData = () => {
     dispatch(fetchManagerStats());
     dispatch(fetchManagerHotels());
@@ -77,7 +95,9 @@ const ManagerDashboard = () => {
     dispatch(fetchManagerReviews());
   };
 
-  // Filter helpers
+
+
+  // FILTER FN
   const filterBySearch = (data, searchFields) => {
     if (!searchTerm) return data || [];
     const search = searchTerm.toLowerCase();
@@ -92,17 +112,24 @@ const ManagerDashboard = () => {
     );
   };
 
-  // Filtered data
+
+
+  // FILTERED DATA
   const filteredHotels = filterBySearch(hotels, ["name", "location"]);
   const filteredRooms = filterBySearch(rooms, ["type", "hotelId"]);
   const filteredBookings = filterBySearch(bookings, ["hotelName", "userName", "userEmail"]);
   const filteredReviews = filterBySearch(reviews, ["hotelName", "userName"]);
 
+
+  // USER LOGOUT FN
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
   };
 
+
+
+  // DELETING A HOTEL - HOTELID
   const handleDeleteHotel = (hotelId) => {
     if (window.confirm("Are you sure you want to delete this hotel? All rooms and bookings will also be deleted.")) {
       dispatch(deleteManagerHotel(hotelId))
@@ -116,6 +143,8 @@ const ManagerDashboard = () => {
     }
   };
 
+
+  // DELETING A ROOM - ROOMID
   const handleDeleteRoom = (roomId) => {
     if (window.confirm("Are you sure you want to delete this room?")) {
       dispatch(deleteManagerRoom(roomId))
@@ -129,6 +158,8 @@ const ManagerDashboard = () => {
     }
   };
 
+
+  // APPROVING A BOOKING - BOOKINGID
   const handleApproveBooking = (bookingId) => {
     dispatch(updateManagerBookingStatus({ bookingId, status: "confirmed" }))
       .then(() => {
@@ -140,6 +171,8 @@ const ManagerDashboard = () => {
       });
   };
 
+
+  // CANDELLING THE BOOKING - BOOKINGID
   const handleRejectBooking = (bookingId) => {
     if (window.confirm("Are you sure you want to reject this booking?")) {
       dispatch(updateManagerBookingStatus({ bookingId, status: "cancelled" }))
@@ -153,6 +186,8 @@ const ManagerDashboard = () => {
     }
   };
 
+
+  // DELETING THE USER REVIEW - REVIEWID
   const handleDeleteReview = (reviewId) => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       dispatch(deleteManagerReview(reviewId))
@@ -166,6 +201,8 @@ const ManagerDashboard = () => {
     }
   };
 
+
+  // REPLYING TO USER REVIEWS - REVIEWID - REPLY
   const handleReplyReview = (reviewId, managerReply) => {
     dispatch(respondToReview({ reviewId, managerReply }))
       .then(() => {
@@ -177,6 +214,9 @@ const ManagerDashboard = () => {
       });
   };
 
+
+
+  // ALL THE TABS PRESENT IN THE DASHBOARD
   const tabs = [
     { id: "dashboard", icon: <FaChartBar />, label: "Dashboard" },
     { id: "hotels", icon: <FaBuilding />, label: "Hotels" },
@@ -185,11 +225,15 @@ const ManagerDashboard = () => {
     { id: "reviews", icon: <FaStar />, label: "Reviews" },
   ];
 
+
+  // UI
   return (
     <div className="d-flex flex-column min-vh-100">
       <div className="flex-grow-1" style={{ backgroundColor: "#f8f9fa", paddingTop: "20px", paddingBottom: "40px" }}>
         <div className="container">
-          {/* Header */}
+
+
+          {/* DASHBOARD HEADER */}
           <DashboardHeader 
             title="Manager Dashboard"
             subtitle="Manage your hotels and monitor bookings"
@@ -198,21 +242,23 @@ const ManagerDashboard = () => {
             onLogoutClick={handleLogout}
           />
 
-          {/* Tab Navigation */}
+
+          {/* DASHBOARD TABS */}
           <DashboardTabs 
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={(id) => { setActiveTab(id); setSearchTerm(""); }}
           />
 
-          {/* Search Bar */}
+
+          {/* DASHBOARD SEARCH */}
           <DashboardSearch 
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             placeholder={`Search ${activeTab}...`}
           />
 
-          {/* Content */}
+
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body p-4">
               {loading && (
@@ -225,7 +271,11 @@ const ManagerDashboard = () => {
 
               {!loading && activeTab === "dashboard" && (
                 <>
+
+                  {/* BUSINESS OVERVIEW */}
                   <h5 className="fw-bold mb-4 text-dark">Business Overview</h5>
+
+                  {/* BUSINESS STATS */}
                   <ManagerStats stats={stats} />
                   
                   <div className="mt-5">
@@ -233,6 +283,8 @@ const ManagerDashboard = () => {
                       <h5 className="fw-bold mb-0 text-dark">Recent Bookings</h5>
                       <button className="btn btn-link text-primary text-decoration-none fw-bold" onClick={() => setActiveTab("bookings")}>View All</button>
                     </div>
+
+                    {/* RECENT BOOKINGS TABLE */}
                     <ManagerBookingTable 
                       bookings={(filteredBookings || []).slice(0, 5)} 
                       onApprove={handleApproveBooking} 
@@ -242,6 +294,7 @@ const ManagerDashboard = () => {
                 </>
               )}
 
+              {/* HOTELS TAB */}
               {!loading && activeTab === "hotels" && (
                 <ManagerHotelSection 
                   hotels={filteredHotels}
@@ -250,6 +303,7 @@ const ManagerDashboard = () => {
                 />
               )}
 
+              {/* ROOMS TAB */}
               {!loading && activeTab === "rooms" && (
                 <ManagerRoomSection 
                   rooms={filteredRooms}
@@ -259,6 +313,7 @@ const ManagerDashboard = () => {
                 />
               )}
 
+              {/* BOOKINGS TAB */}
               {!loading && activeTab === "bookings" && (
                 <ManagerBookingSection 
                   bookings={filteredBookings}
@@ -267,6 +322,7 @@ const ManagerDashboard = () => {
                 />
               )}
 
+              {/* REVIEWS TAB */}
               {!loading && activeTab === "reviews" && (
                 <ManagerReviewSection 
                   reviews={filteredReviews}
@@ -279,6 +335,7 @@ const ManagerDashboard = () => {
 
           {/* Add Room Modal */}
           {showAddRoomModal && (
+            
             <AddRoomForm 
               hotels={hotels} 
               onClose={() => setShowAddRoomModal(false)}

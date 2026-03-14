@@ -62,6 +62,22 @@ const BookingSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    hotelName: {
+      type: String,
+      required: false,
+    },
+    roomType: {
+      type: String,
+      required: false,
+    },
+    totalPrice: {
+      type: Number,
+      required: false,
+    },
+    guestName: {
+      type: String,
+      required: false,
+    },
     extras: {
       type: [String],
       default: [],

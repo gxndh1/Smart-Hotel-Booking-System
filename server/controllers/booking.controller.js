@@ -55,9 +55,10 @@ export const createBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Room not found' });
     }
 
-    // Fetch guest email
-    const guest = await User.findById(req.user.id).select('email');
+    // Fetch guest email and name
+    const guest = await User.findById(req.user.id).select('email name');
     const guestEmail = guest ? guest.email : '';
+    const guestName = guest ? guest.name : '';
     const managerEmail = room.hotelId?.managerId?.email || '';
 
     // Check inventory availability
@@ -101,6 +102,14 @@ export const createBooking = async (req, res) => {
     // FIX: Redemption rate standardized to 1 point = 1 rupee
     const redemptionDiscountAmount = redemptionPointsUsed ? redemptionPointsUsed * 1 : 0;
 
+    // Calculate total price based on logic in getBookings
+    const totalNights = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+    const roomPrice = room.price || 0;
+    const basePrice = roomPrice * totalNights * numRooms;
+    const tax = basePrice * 0.12;
+    const finalExtrasAmount = extrasAmount || 0;
+    const totalPrice = basePrice + tax + finalExtrasAmount - redemptionDiscountAmount;
+
     // Create booking with pending status
     const booking = await Booking.create({
       userId: req.user.id,
@@ -110,11 +119,15 @@ export const createBooking = async (req, res) => {
       checkOutDate,
       status: 'pending',
       guestEmail,
+      guestName,
       managerEmail,
+      hotelName: room.hotelId?.name || '',
+      roomType: room.type || '',
+      totalPrice,
       redemptionPointsUsed: redemptionPointsUsed || 0,
       redemptionDiscountAmount: redemptionDiscountAmount,
       extras: extras || [],
-      extrasAmount: extrasAmount || 0,
+      extrasAmount: finalExtrasAmount,
       additionalGuests: additionalGuests || []
     });
 

@@ -3,6 +3,8 @@ import { FaTimes, FaPlus } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
 import { createManagerRoom } from '../../../redux/managerSlice';
 
+
+// ADD ROOM FORM
 const AddRoomForm = ({ hotels, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,7 @@ const AddRoomForm = ({ hotels, onClose, onSuccess }) => {
     description: ''
   });
 
+  // SUBMIT FN
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
