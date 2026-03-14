@@ -1,7 +1,7 @@
 import React from 'react';
 import ManagerBookingTable from './ManagerBookingTable';
 
-const ManagerBookingSection = ({ bookings, onApprove, onReject }) => {
+const ManagerBookingSection = ({ bookings, onApprove, onReject, onEdit, onDelete }) => {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -12,6 +12,8 @@ const ManagerBookingSection = ({ bookings, onApprove, onReject }) => {
         bookings={bookings} 
         onApprove={onApprove} 
         onReject={onReject} 
+        onEdit={onEdit}
+        onDelete={onDelete}
       />
     </>
   );

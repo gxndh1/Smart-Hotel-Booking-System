@@ -1,7 +1,7 @@
 import React from 'react';
-import { FaCheck, FaTimes, FaUser, FaCalendarAlt, FaBed } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaUser, FaCalendarAlt, FaBed, FaEdit, FaTrash } from 'react-icons/fa';
 
-const ManagerBookingTable = ({ bookings = [], onApprove, onReject }) => {
+const ManagerBookingTable = ({ bookings = [], onApprove, onReject, onEdit, onDelete }) => {
   if (bookings.length === 0) {
     return <div className="text-center py-5 text-muted">No bookings found for your hotels.</div>;
   }
@@ -78,8 +78,21 @@ const ManagerBookingTable = ({ bookings = [], onApprove, onReject }) => {
                     </>
                   )}
                   {booking.status !== 'pending' && (
-                    <span className="text-muted small italic">No actions available</span>
+                    <button 
+                      className="btn btn-outline-primary" 
+                      onClick={() => onEdit(booking)}
+                      title="Edit Booking"
+                    >
+                      <FaEdit />
+                    </button>
                   )}
+                  <button 
+                    className="btn btn-outline-danger" 
+                    onClick={() => onDelete(booking._id)}
+                    title="Delete Booking"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </td>
             </tr>

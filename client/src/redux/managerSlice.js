@@ -101,6 +101,24 @@ export const updateManagerBookingStatus = createAsyncThunk(
   }
 );
 
+export const deleteManagerBooking = createAsyncThunk('manager/deleteBooking', async (id, { rejectWithValue }) => {
+  try {
+    await api.delete(`manager/bookings/${id}`);
+    return id;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to delete booking');
+  }
+});
+
+export const updateManagerBookingDetails = createAsyncThunk('manager/updateBookingDetails', async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const response = await api.put(`manager/bookings/${id}`, data);
+    return response.data;
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || 'Failed to update booking');
+  }
+});
+
 export const deleteManagerReview = createAsyncThunk('manager/deleteReview', async (id, { rejectWithValue }) => {
   try {
     await api.delete(`manager/reviews/${id}`);
@@ -138,7 +156,18 @@ const managerSlice = createSlice({
       .addCase(deleteManagerHotel.fulfilled, (state, action) => { state.hotels = state.hotels.filter(h => h._id !== action.payload); })
       .addCase(updateManagerBookingStatus.fulfilled, (state, action) => {
         const index = state.bookings.findIndex(b => b._id === action.payload._id);
-        if (index !== -1) state.bookings[index] = action.payload;
+        if (index !== -1) {
+          state.bookings[index].status = action.payload.status;
+        }
+      })
+      .addCase(updateManagerBookingDetails.fulfilled, (state, action) => {
+        const index = state.bookings.findIndex(b => b._id === action.payload._id);
+        if (index !== -1) {
+          state.bookings[index] = { ...state.bookings[index], ...action.payload };
+        }
+      })
+      .addCase(deleteManagerBooking.fulfilled, (state, action) => {
+        state.bookings = state.bookings.filter(b => b._id !== action.payload);
       })
       .addCase(deleteManagerReview.fulfilled, (state, action) => { state.reviews = state.reviews.filter(r => r._id !== action.payload); });
   }

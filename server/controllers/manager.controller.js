@@ -675,3 +675,89 @@ export const deleteManagerRoom = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message || 'Server error' });
   }
 };
+
+// @desc    Delete a booking (manager only)
+// @route   DELETE /api/manager/bookings/:id
+// @access  Private (manager only)
+export const deleteManagerBooking = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const booking = await Booking.findById(req.params.id).populate({
+      path: 'roomId',
+      populate: { path: 'hotelId' }
+    });
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    // Verify hotel belongs to this manager
+    if (booking.roomId.hotelId.managerId.toString() !== userObjectId.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    // Delete associated payments and redemptions
+    await Payment.deleteMany({ bookingId: booking._id });
+    await Redemption.deleteMany({ bookingId: booking._id });
+    
+    // Delete booking
+    await Booking.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Booking deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete manager booking error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
+// @desc    Update manager booking details (dates, rooms, etc)
+// @route   PUT /api/manager/bookings/:id
+// @access  Private (manager only)
+export const updateManagerBookingDetails = async (req, res) => {
+  try {
+    const { checkInDate, checkOutDate, numberOfRooms, status } = req.body;
+    const userId = req.user.id;
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const booking = await Booking.findById(req.params.id).populate({
+      path: 'roomId',
+      populate: { path: 'hotelId' }
+    });
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    // Verify hotel belongs to this manager
+    if (booking.roomId.hotelId.managerId.toString() !== userObjectId.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    if (checkInDate) booking.checkInDate = checkInDate;
+    if (checkOutDate) booking.checkOutDate = checkOutDate;
+    if (numberOfRooms) booking.numberOfRooms = numberOfRooms;
+    if (status) booking.status = status;
+
+    await booking.save();
+
+    await booking.populate('userId', 'name email');
+    await booking.populate({
+      path: 'roomId',
+      populate: { path: 'hotelId', select: 'name' }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: booking,
+      message: 'Booking details updated successfully'
+    });
+  } catch (error) {
+    console.error('Update manager booking details error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};

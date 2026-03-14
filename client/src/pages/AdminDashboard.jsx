@@ -42,7 +42,9 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Redux selectors
+
+
+  // REDUX SELECTORS
   const stats = useSelector(selectAdminStats);
   const customers = useSelector(selectCustomers);
   const managers = useSelector(selectManagers);
@@ -55,18 +57,20 @@ const AdminDashboard = () => {
   const error = useSelector(selectAdminError);
   const auth = useSelector((state) => state.auth);
 
-  // Fetch data on mount
+
+
+  // FETCH DATA ON MOUNT
   useEffect(() => {
     loadData();
   }, [dispatch]);
-
-  // Handle errors from the backend
   useEffect(() => {
     if (error) {
       console.error("Admin Dashboard Error:", error);
     }
   }, [error]);
 
+
+  // LOAD DATA
   const loadData = () => {
     dispatch(fetchDashboardStats());
     dispatch(fetchAdminUsers());
@@ -76,7 +80,9 @@ const AdminDashboard = () => {
     dispatch(fetchAdminReviews());
   };
 
-  // Filter helpers
+
+
+  // FILTER DATA WHILE SEARCH
   const filterBySearch = (data, searchFields) => {
     if (!searchTerm) return data || [];
     const search = searchTerm.toLowerCase();
@@ -98,11 +104,15 @@ const AdminDashboard = () => {
   const filteredBookings = filterBySearch(bookings, ["hotelName", "userName", "userEmail", "bookingId"]);
   const filteredReviews = filterBySearch(reviews, ["hotelName", "userName"]);
 
+
+  // LOGOUT FN
   const handleLogout = () => {
     dispatch(logout());
     navigate("/");
   };
 
+
+  // DELETE USER
   const handleDeleteUser = (userId) => {
     if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
       dispatch(deleteUser(userId))
@@ -116,6 +126,8 @@ const AdminDashboard = () => {
     }
   };
 
+
+  // DELETE HOTEL
   const handleDeleteHotel = (hotelId) => {
     if (window.confirm("Are you sure you want to delete this hotel? All rooms and bookings will also be deleted.")) {
       dispatch(deleteHotel(hotelId))
@@ -129,6 +141,8 @@ const AdminDashboard = () => {
     }
   };
 
+
+  //APPROVAL
   const handleApproveBooking = (bookingId) => {
     dispatch(updateAdminBookingStatus({ bookingId, status: "confirmed" }))
       .then(() => {
@@ -140,6 +154,8 @@ const AdminDashboard = () => {
       });
   };
 
+
+  //CANCE;LING
   const handleRejectBooking = (bookingId) => {
     if (window.confirm("Are you sure you want to reject this booking?")) {
       dispatch(updateAdminBookingStatus({ bookingId, status: "cancelled" }))
@@ -153,6 +169,8 @@ const AdminDashboard = () => {
     }
   };
 
+
+  // DELETE REVIEW
   const handleDeleteReview = (reviewId) => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       dispatch(deleteReview(reviewId))
@@ -166,6 +184,8 @@ const AdminDashboard = () => {
     }
   };
 
+
+  // ROLE CHANGING
   const handleRoleChange = (userId, newRole) => {
     dispatch(updateUserRole({ userId, role: newRole }))
       .then(() => {
@@ -177,6 +197,8 @@ const AdminDashboard = () => {
       });
   };
 
+
+  // DEFING TABS
   const tabs = [
     { id: "dashboard", icon: <FaChartBar />, label: "Overview" },
     { id: "customers", icon: <FaUsers />, label: "Customers" },
@@ -187,11 +209,13 @@ const AdminDashboard = () => {
     { id: "reviews", icon: <FaClipboardList />, label: "Reviews" },
   ];
 
+
+  //UI
   return (
     <div className="d-flex flex-column min-vh-100">
       <div className="flex-grow-1" style={{ backgroundColor: "#f8f9fa", paddingTop: "20px", paddingBottom: "40px" }}>
         <div className="container">
-          {/* Header */}
+          
           <div className="position-relative">
             <DashboardHeader
               title="Admin Central Command"
@@ -210,21 +234,18 @@ const AdminDashboard = () => {
             </button>
           </div>
 
-          {/* Tab Navigation */}
           <DashboardTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={(id) => { setActiveTab(id); setSearchTerm(""); }}
           />
 
-          {/* Search Bar */}
           <DashboardSearch
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             placeholder={`Search ${activeTab}...`}
           />
-
-          {/* Content */}
+          
           <div className="card shadow-sm border-0 rounded-4">
             <div className="card-body p-4">
               {loading && (

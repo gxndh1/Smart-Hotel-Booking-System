@@ -12,6 +12,8 @@ import {
   deleteManagerHotel,
   deleteManagerRoom,
   updateManagerBookingStatus,
+  deleteManagerBooking,
+  updateManagerBookingDetails,
   deleteManagerReview,
   selectManagerStats,
   selectManagerHotels,
@@ -25,6 +27,7 @@ import { FaBuilding, FaBed, FaCalendarCheck, FaStar, FaChartBar } from "react-ic
 import AddRoomForm from "../components/features/manager/AddRoomForm";
 import ManagerStats from "../components/features/manager/ManagerStats";
 import ManagerBookingTable from "../components/features/manager/ManagerBookingTable";
+import EditBookingModal from "../components/features/manager/EditBookingModal";
 import { respondToReview } from "../redux/reviewSlice";
 import DashboardHeader from "../components/common/dashboards/DashboardHeader";
 import DashboardTabs from "../components/common/dashboards/DashboardTabs";
@@ -40,6 +43,7 @@ const ManagerDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddRoomModal, setShowAddRoomModal] = useState(false);
+  const [editingBooking, setEditingBooking] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -186,6 +190,31 @@ const ManagerDashboard = () => {
     }
   };
 
+  // DELETING A BOOKING - BOOKINGID
+  const handleDeleteManagerBooking = (bookingId) => {
+    if (window.confirm("Are you sure you want to permanently delete this booking?")) {
+      dispatch(deleteManagerBooking(bookingId))
+        .then(() => {
+          alert("Booking deleted successfully");
+          loadData();
+        })
+        .catch((err) => {
+          alert(err.message || "Failed to delete booking");
+        });
+    }
+  };
+
+  const handleEditBookingSubmit = (bookingId, data) => {
+    dispatch(updateManagerBookingDetails({ id: bookingId, data }))
+      .then(() => {
+        alert("Booking updated successfully");
+        setEditingBooking(null);
+        loadData();
+      })
+      .catch((err) => {
+        alert(err.message || "Failed to update booking");
+      });
+  };
 
   // DELETING THE USER REVIEW - REVIEWID
   const handleDeleteReview = (reviewId) => {
@@ -289,6 +318,8 @@ const ManagerDashboard = () => {
                       bookings={(filteredBookings || []).slice(0, 5)} 
                       onApprove={handleApproveBooking} 
                       onReject={handleRejectBooking} 
+                      onEdit={setEditingBooking}
+                      onDelete={handleDeleteManagerBooking}
                     />
                   </div>
                 </>
@@ -319,6 +350,8 @@ const ManagerDashboard = () => {
                   bookings={filteredBookings}
                   onApprove={handleApproveBooking}
                   onReject={handleRejectBooking}
+                  onEdit={setEditingBooking}
+                  onDelete={handleDeleteManagerBooking}
                 />
               )}
 
@@ -343,6 +376,15 @@ const ManagerDashboard = () => {
                 setShowAddRoomModal(false);
                 loadData();
               }}
+            />
+          )}
+
+          {/* Edit Booking Modal */}
+          {editingBooking && (
+            <EditBookingModal
+              booking={editingBooking}
+              onClose={() => setEditingBooking(null)}
+              onSubmit={handleEditBookingSubmit}
             />
           )}
         </div>

@@ -1,5 +1,16 @@
 import express from 'express';
-import {getManagerDashboardStats,getManagerHotels,getManagerRooms,getManagerBookings,updateManagerBookingStatus,getManagerReviews,deleteManagerReview,getManagerProfile} from '../controllers/manager.controller.js';
+import {
+  getManagerDashboardStats,
+  getManagerHotels,
+  getManagerRooms,
+  getManagerBookings,
+  updateManagerBookingStatus,
+  deleteManagerBooking,
+  updateManagerBookingDetails,
+  getManagerReviews,
+  deleteManagerReview,
+  getManagerProfile
+} from '../controllers/manager.controller.js';
 import { createHotel, updateHotel, deleteHotel } from '../controllers/hotel.controller.js';
 import { createRoom, updateRoom, deleteRoom } from '../controllers/room.controller.js';
 import { protect, authorize } from '../middleware/auth.middleware.js';
@@ -19,6 +30,8 @@ router.put('/rooms/:id', updateRoom);
 router.delete('/rooms/:id', deleteRoom);
 router.get('/bookings', getManagerBookings);
 router.put('/bookings/:id/status', updateManagerBookingStatus);
+router.put('/bookings/:id', updateManagerBookingDetails);
+router.delete('/bookings/:id', deleteManagerBooking);
 router.get('/reviews', getManagerReviews);
 router.delete('/reviews/:id', deleteManagerReview);
 
