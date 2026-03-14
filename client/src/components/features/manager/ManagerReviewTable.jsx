@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FaStar, FaReply, FaTrash, FaUser } from 'react-icons/fa';
+import { FaStar, FaReply, FaTrash, FaUser, FaEdit } from 'react-icons/fa';
 
 
 // REVIEW TABLE
-const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
+const ManagerReviewTable = ({ reviews = [], onReply }) => {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
 
@@ -13,6 +13,11 @@ const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
     onReply(reviewId, replyText);
     setReplyingTo(null);
     setReplyText('');
+  };
+
+  const handleEditClick = (review) => {
+    setReplyingTo(review._id);
+    setReplyText(review.managerReply || '');
   };
 
   // NO REVIEWS
@@ -29,7 +34,6 @@ const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
             <th className="ps-4">Hotel & Guest</th>
             <th>Rating & Comment</th>
             <th>Response</th>
-            <th className="text-end pe-4">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -48,11 +52,7 @@ const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
                 </div>
               </td>
               <td>
-                {review.managerReply ? (
-                  <div className="small text-success italic">
-                    <FaReply className="me-1"/> {review.managerReply}
-                  </div>
-                ) : replyingTo === review._id ? (
+                {replyingTo === review._id ? (
                   <div className="input-group input-group-sm">
                     <input 
                       type="text" 
@@ -61,16 +61,23 @@ const ManagerReviewTable = ({ reviews = [], onDelete, onReply }) => {
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                     />
-                    <button className="btn btn-primary" onClick={() => handleReplySubmit(review._id)}>Send</button>
+                    <button className="btn btn-primary" onClick={() => handleReplySubmit(review._id)}>
+                      {review.managerReply ? 'Update' : 'Send'}
+                    </button>
+                    <button className="btn btn-outline-secondary" onClick={() => { setReplyingTo(null); setReplyText(''); }}>Cancel</button>
+                  </div>
+                ) : review.managerReply ? (
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div className="small text-success italic">
+                      <FaReply className="me-1"/> {review.managerReply}
+                    </div>
+                    <button className="btn btn-sm btn-link text-primary p-0 ms-2" onClick={() => handleEditClick(review)} title="Edit Reply">
+                      <FaEdit />
+                    </button>
                   </div>
                 ) : (
-                  <button className="btn btn-sm btn-link text-primary p-0" onClick={() => setReplyingTo(review._id)}>Add Reply</button>
+                  <button className="btn btn-sm btn-link text-primary p-0" onClick={() => handleEditClick(review)}>Add Reply</button>
                 )}
-              </td>
-              <td className="text-end pe-4">
-                <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete(review._id)}>
-                  <FaTrash />
-                </button>
               </td>
             </tr>
           ))}

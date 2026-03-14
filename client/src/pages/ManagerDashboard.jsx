@@ -14,7 +14,6 @@ import {
   updateManagerBookingStatus,
   deleteManagerBooking,
   updateManagerBookingDetails,
-  deleteManagerReview,
   selectManagerStats,
   selectManagerHotels,
   selectManagerRooms,
@@ -216,21 +215,6 @@ const ManagerDashboard = () => {
       });
   };
 
-  // DELETING THE USER REVIEW - REVIEWID
-  const handleDeleteReview = (reviewId) => {
-    if (window.confirm("Are you sure you want to delete this review?")) {
-      dispatch(deleteManagerReview(reviewId))
-        .then(() => {
-          alert("Review deleted successfully");
-          loadData();
-        })
-        .catch((err) => {
-          alert(err.message || "Failed to delete review");
-        });
-    }
-  };
-
-
   // REPLYING TO USER REVIEWS - REVIEWID - REPLY
   const handleReplyReview = (reviewId, managerReply) => {
     dispatch(respondToReview({ reviewId, managerReply }))
@@ -359,7 +343,6 @@ const ManagerDashboard = () => {
               {!loading && activeTab === "reviews" && (
                 <ManagerReviewSection 
                   reviews={filteredReviews}
-                  onDelete={handleDeleteReview}
                   onReply={handleReplyReview}
                 />
               )}

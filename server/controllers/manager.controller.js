@@ -507,7 +507,6 @@ export const getManagerReviews = async (req, res) => {
       .populate('hotelId', 'name location')
       .sort({ createdAt: -1 });
 
-    // Transform data
     const transformedReviews = reviews.map(review => ({
       _id: review._id,
       userId: review.userId?._id || review.userId,
@@ -516,6 +515,7 @@ export const getManagerReviews = async (req, res) => {
       hotelName: review.hotelId?.name || 'Unknown',
       rating: review.rating,
       comment: review.comment,
+      managerReply: review.managerReply,
       isVerified: review.isVerified || false,
       createdAt: review.createdAt
     }));

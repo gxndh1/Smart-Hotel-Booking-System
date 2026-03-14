@@ -1,7 +1,8 @@
+```javascript
 import React from 'react';
 import ManagerReviewTable from './ManagerReviewTable';
 
-const ManagerReviewSection = ({ reviews, onDelete, onReply }) => {
+const ManagerReviewSection = ({ reviews, onReply }) => {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -10,11 +11,11 @@ const ManagerReviewSection = ({ reviews, onDelete, onReply }) => {
       {/* REVIEW TABLE */}
       <ManagerReviewTable 
         reviews={reviews} 
-        onDelete={onDelete} 
-        onReply={onReply} 
+        onReply={onReply}
       />
     </>
   );
 };
 
 export default ManagerReviewSection;
+```
