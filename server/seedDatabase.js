@@ -23,11 +23,11 @@ const seedData = async () => {
 
     // 1. Create Admin
     const admin = await User.create({
-      name: 'System Admin',
+      name: 'Animesh Gandhi',
       email: 'admin@hotel.com',
       password: 'password123',
       role: 'admin',
-      contactNumber: '1234567890'
+      contactNumber: '7783099238'
     });
     console.log('Admin user created.');
 
