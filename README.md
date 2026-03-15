@@ -207,3 +207,37 @@ These are the public-facing APIs used by customers on the main website.
   - **Method:** `PUT`
   - **URL:** `http://localhost:5600/api/admin/bookings/:id/status`
   - **Body (JSON):** `{"status": "cancelled"}`
+
+---
+
+## 💾 Data Storage Architecture
+
+The Smart Hotel Booking System utilizes a multi-layered storage approach to ensure data persistence, security, and high performance.
+
+### 🍃 1. MongoDB (Primary Persistence)
+This is the database of record. It stores all shared, permanent data that must be accessible across all users and devices.
+*   **User Management:** Stores credentials, hashed passwords, contact info, and role-based permissions (Guest, Manager, Admin).
+*   **Property Inventory:** Full details for Hotels and Rooms, including descriptions, amenities, pricing, and live availability statuses.
+*   **Transaction Records:** Every historical and upcoming Booking, Payment transactions, and Loyalty point earnings/redemptions.
+*   **Social Data:** Guest Reviews and the corresponding Manager replies.
+
+### 📂 2. Local Storage (Persistent Client Storage)
+Used for data that should survive browser restarts but is specific to a single user's device.
+*   **Mock/Legacy Data:** Utilized by certain utilities (`managerGenerator.js`) to store local collections of users or hotels for development/testing overrides.
+*   **User Preferences:** Remembers specific UI settings or non-sensitive configurations for an improved personal experience.
+*   **Persistence Buffers:** Occasionally used to save complex form data if a user navigates away before submitting to the database.
+
+### ⏱️ 3. Session Storage (Temporary Client Storage)
+Data kept only for the duration of a single browser tab session.
+*   **Quick Permissions:** Stores the `userRole` temporarily to allow for instant UI adaptations (like showing/hiding dashboard links) without waiting for a server heartbeat.
+*   **Runtime Context:** Holds temporary flags that should be reset whenever the user starts a fresh session by closing/opening the tab.
+
+### 🍪 4. Browser Cookies (Security & Auth)
+The primary mechanism for maintaining a secure session.
+*   **JWT Transportation:** The JSON Web Token (JWT) is typically served via cookies. It carries the user's `id` and `role`, authorizing every API request sent from the frontend.
+
+### ⚛️ 5. Redux State (Application Memory)
+This represents the "Active Memory" of the running application. It is stored in RAM and is highly performant.
+*   **Data Caching:** To avoid redundant database queries, Redux stores the current list of hotels, active bookings, and user profile data once fetched.
+*   **Reactive UI:** Manages the "Single Source of Truth" for the interface—controlling loading spinners, error messages, modal states, and dynamic filtering.
+*   **Sync Logic:** Bridges the gap between the server (MongoDB) and the user, ensuring the UI reflects changes immediately after an action (like updating a room price).

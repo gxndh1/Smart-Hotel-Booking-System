@@ -1,13 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 
-// Async thunk to fetch all users (admin only)
+
 export const fetchAllUsers = createAsyncThunk('users/fetchAllUsers', async () => {
   const response = await api.get('/auth/users');
   return response.data.data;
 });
 
-// Async thunk to fetch users from backend (legacy)
+
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
   const response = await api.get('/auth/me');
   return response.data.data;

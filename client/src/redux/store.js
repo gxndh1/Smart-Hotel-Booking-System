@@ -13,6 +13,8 @@ import loyaltyReducer from './loyaltySlice';
 import managerReducer from './managerSlice';
 import adminReducer from './adminSlice';
 
+
+//REDUX STATE TREE
 const appReducer = combineReducers({
   auth: authReducer,
   hotels: hotelReducer,

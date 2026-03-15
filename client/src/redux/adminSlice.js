@@ -1,67 +1,67 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import api from '../utils/api';
 
-// Async thunk to fetch dashboard stats
+
 export const fetchDashboardStats = createAsyncThunk('admin/fetchDashboardStats', async () => {
   const response = await api.get('/admin/stats');
   return response.data.data;
 });
 
-// Async thunk to fetch all users
+
 export const fetchAdminUsers = createAsyncThunk('admin/fetchUsers', async () => {
   const response = await api.get('/admin/users');
   return response.data.data;
 });
 
-// Async thunk to fetch all hotels
+
 export const fetchAdminHotels = createAsyncThunk('admin/fetchHotels', async () => {
   const response = await api.get('/admin/hotels');
   return response.data.data;
 });
 
-// Async thunk to fetch all bookings
+
 export const fetchAdminBookings = createAsyncThunk('admin/fetchBookings', async () => {
   const response = await api.get('/admin/bookings');
   return response.data.data;
 });
 
-// Async thunk to fetch most booked hotels
+
 export const fetchMostBookedHotels = createAsyncThunk('admin/fetchMostBooked', async () => {
   const response = await api.get('/admin/analytics/most-booked');
   return response.data.data;
 });
 
-// Async thunk to fetch all reviews
+
 export const fetchAdminReviews = createAsyncThunk('admin/fetchReviews', async () => {
   const response = await api.get('/admin/reviews');
   return response.data.data;
 });
 
-// Async thunk to delete user
+
 export const deleteUser = createAsyncThunk('admin/deleteUser', async (userId) => {
   await api.delete(`/admin/users/${userId}`);
   return userId;
 });
 
-// Async thunk to delete hotel
+
 export const deleteHotel = createAsyncThunk('admin/deleteHotel', async (hotelId) => {
   await api.delete(`/admin/hotels/${hotelId}`);
   return hotelId;
 });
 
-// Async thunk to update booking status
+
 export const updateAdminBookingStatus = createAsyncThunk('admin/updateBookingStatus', async ({ bookingId, status }) => {
   const response = await api.put(`/admin/bookings/${bookingId}/status`, { status });
   return response.data.data;
 });
 
-// Async thunk to update user role
+
 export const updateUserRole = createAsyncThunk('admin/updateUserRole', async ({ userId, role }) => {
   const response = await api.put(`/admin/users/${userId}/role`, { role });
   return response.data.data;
 });
 
-// Async thunk to delete review
+
 export const deleteReview = createAsyncThunk('admin/deleteReview', async (reviewId) => {
   await api.delete(`/admin/reviews/${reviewId}`);
   return reviewId;

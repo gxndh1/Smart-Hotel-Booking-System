@@ -128,6 +128,8 @@ export const deleteManagerReview = createAsyncThunk('manager/deleteReview', asyn
   }
 });
 
+
+// SLICE
 const managerSlice = createSlice({
   name: 'manager',
   initialState: {
@@ -150,7 +152,7 @@ const managerSlice = createSlice({
       .addCase(createManagerRoom.fulfilled, (state, action) => { state.rooms.push(action.payload); })
       .addCase(updateManagerRoom.fulfilled, (state, action) => {
         const index = state.rooms.findIndex(r => r._id === action.payload._id);
-        if (index !== -1) state.rooms[index] = action.payload;
+        if (index !== -1) state.rooms[index] = action.payload; //No match found
       })
       .addCase(deleteManagerRoom.fulfilled, (state, action) => { state.rooms = state.rooms.filter(r => r._id !== action.payload); })
       .addCase(deleteManagerHotel.fulfilled, (state, action) => { state.hotels = state.hotels.filter(h => h._id !== action.payload); })
