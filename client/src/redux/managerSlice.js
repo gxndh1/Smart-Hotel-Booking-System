@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 
-// Thunks for Manager Dashboard
+//THUNKS
 export const fetchManagerStats = createAsyncThunk('manager/fetchStats', async (_, { rejectWithValue }) => {
   try {
     const response = await api.get('manager/stats');

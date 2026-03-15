@@ -97,3 +97,113 @@ VITE_API_URL=http://localhost:5600
 
 4. **Access the Application**
    Open your browser and navigate to `http://localhost:5173`.
+
+---
+
+## 🔌 API Documentation (Postman Guide)
+
+This section contains the essential REST API endpoints used across the Landing Page, Manager Dashboard, and Admin Dashboard. You can use these endpoints to demonstrate the API functionality in Postman.
+
+> **Note on Authentication:** 
+> For any endpoints labeled `[Requires Auth]`, you must first hit the Login endpoint, copy the `token` from the response, and then paste it into the **Authorization** tab in Postman. Select **Bearer Token** and paste the token there.
+
+### 🌎 1. Landing Page & Public APIs
+
+These are the public-facing APIs used by customers on the main website.
+
+- **Register a New User**
+  - **Method:** `POST`
+  - **URL:** `http://localhost:5600/api/auth/register`
+  - **Body (JSON):**
+    ```json
+    {
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "password": "password123",
+      "confirmPassword": "password123",
+      "contactNumber": "9876543210",
+      "role": "guest" 
+    }
+    ```
+
+- **Login**
+  - **Method:** `POST`
+  - **URL:** `http://localhost:5600/api/auth/login`
+  - **Body (JSON):**
+    ```json
+    {
+      "email": "jane@example.com",
+      "password": "password123"
+    }
+    ```
+    *(Copy the resulting `token` for authenticated requests)*
+
+- **Get All Hotels (Listings)**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/hotels`
+
+- **Get Specific Hotel Details**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/hotels/:id`
+
+---
+
+### 🏢 2. Manager Dashboard APIs
+
+> **Authentication Required:** You must login as a manager and use their Bearer Token.
+
+- **Get Manager Dashboard Stats**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/manager/stats`
+
+- **Get Manager's Property Listings**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/manager/hotels`
+
+- **Add a New Room**
+  - **Method:** `POST`
+  - **URL:** `http://localhost:5600/api/manager/rooms`
+  - **Body (JSON):**
+    ```json
+    {
+      "hotelId": "VALID_HOTEL_ID",
+      "type": "Deluxe",
+      "capacity": 2,
+      "price": 2500,
+      "features": ["WiFi", "AC"]
+    }
+    ```
+
+- **Update Booking Status**
+  - **Method:** `PUT`
+  - **URL:** `http://localhost:5600/api/manager/bookings/:id/status`
+  - **Body (JSON):** `{"status": "confirmed"}`
+
+- **Respond to a Review**
+  - **Method:** `PUT`
+  - **URL:** `http://localhost:5600/api/reviews/:id/respond`
+  - **Body (JSON):** `{"managerReply": "Your response..."}`
+
+---
+
+### 👑 3. Admin Dashboard APIs
+
+> **Authentication Required:** You must login as an admin and use their Bearer Token.
+
+- **Get Admin Dashboard Stats**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/admin/stats`
+
+- **Change a User's Role**
+  - **Method:** `PUT`
+  - **URL:** `http://localhost:5600/api/admin/users/:id/role`
+  - **Body (JSON):** `{"role": "manager"}`
+
+- **Get All Properties Worldwide**
+  - **Method:** `GET`
+  - **URL:** `http://localhost:5600/api/admin/hotels`
+
+- **Cancel any Booking (Admin Override)**
+  - **Method:** `PUT`
+  - **URL:** `http://localhost:5600/api/admin/bookings/:id/status`
+  - **Body (JSON):** `{"status": "cancelled"}`
