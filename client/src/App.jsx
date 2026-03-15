@@ -20,10 +20,7 @@ import Error from "./pages/Error";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 
-/**
- * App Component
- * Handles the global routing configuration for the application.
- */
+
 const App = () => {
   const navigate = useNavigate();
 
